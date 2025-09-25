@@ -15,7 +15,8 @@ class FilmRollView extends StatelessWidget {
     required this.itemCount,
     required this.itemEdgeInsets,
     this.shareIcon,
-    this.draftPage, // 0-based, undeveloped 롤의 “다음에 쓸 인덱스”
+    this.draftPage,
+    this.onCapturePressed,
   });
 
   final int rollIndex;
@@ -28,7 +29,8 @@ class FilmRollView extends StatelessWidget {
   final int itemCount;
   final EdgeInsets Function(int, int) itemEdgeInsets;
   final Widget? shareIcon;
-  final int? draftPage;
+  final int? draftPage; // 0-based, undeveloped 롤의 “다음에 쓸 인덱스”
+  final VoidCallback? onCapturePressed;
 
   static const double _kCardRadius = 8.0; // 카드와 동일
 
@@ -205,7 +207,27 @@ class FilmRollView extends StatelessWidget {
                           borderRadius: borderRadius,
                         ),
                         padding: itemEdgeInsets(itemIndex, itemCount),
-                        child: Roll(rollIndex: rollIndex, itemIndex: itemIndex),
+                        child: Stack(
+                          children: [
+                            Roll(rollIndex: rollIndex, itemIndex: itemIndex),
+                            if (!isDeveloped && itemIndex == draftPage && onCapturePressed != null)
+                              Positioned.fill(
+                                child: GestureDetector(
+                                  onTap: onCapturePressed,
+                                  child: Container(
+                                    color: Colors.black.withOpacity(0.5), // Semi-transparent overlay
+                                    child: const Center(
+                                      child: FaIcon(
+                                        FontAwesomeIcons.plus,
+                                        size: 48,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       );
                     },
                   ),

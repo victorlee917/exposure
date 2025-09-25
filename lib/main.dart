@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:daily_exposures/constants/fonts.dart';
 import 'package:daily_exposures/constants/sizes.dart';
 import 'package:daily_exposures/features/home/home_screen.dart';
@@ -6,7 +7,8 @@ import 'package:flutter/material.dart';
 final ValueNotifier<bool> isDarkMode = ValueNotifier(true);
 final ValueNotifier<bool> isLeftHandedMode = ValueNotifier(false);
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
   runApp(const DailyExposures());
 }
 
