@@ -1,19 +1,15 @@
-// lib/features/capture/capture_movie_screen.dart
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:daily_exposures/features/common/widgets/appbar_gradation.dart';
+import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 
 // ⬇️ CaptionScreen, CaptureOrigin 불러오기
 import 'caption_screen.dart';
 import 'capture_origin.dart'; // MovieOrigin 사용
-
-String extractYear(String? date) {
-  if (date == null || date.isEmpty) return '—';
-  final m = RegExp(r'\b(\d{4})\b').firstMatch(date);
-  return m != null ? m.group(1)! : '—';
-}
+import 'package:daily_exposures/features/capture/widgets/media_result_card.dart';
+import 'package:daily_exposures/features/capture/widgets/utils.dart';
 
 /// ⬇️ Hero 비행 동안 사용할 스냅샷 저장소 (간단 공유 메모리)
 class HeroSnapshotStore {
@@ -86,6 +82,7 @@ class _CaptureMovieScreenState extends State<CaptureMovieScreen> {
 
   // ⬇️ 카드 스냅샷을 찍고 CaptionScreen으로 이동
   Future<void> _goToCaption(MovieItem sel) async {
+    print('Movie _goToCaption called for item: ${sel.title}');
     final heroTag = 'movie-card-${sel.id}';
     final key = _tileBoundaryKeys[heroTag];
 
@@ -128,12 +125,13 @@ class _CaptureMovieScreenState extends State<CaptureMovieScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.black,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.close),
@@ -158,29 +156,33 @@ class _CaptureMovieScreenState extends State<CaptureMovieScreen> {
               onSubmitted: _onSubmitted,
               decoration: InputDecoration(
                 hintText: 'Search movies or TV series by name',
-                hintStyle: const TextStyle(color: Colors.white38),
+                hintStyle: const TextStyle(color: ui.Color.fromARGB(97, 177, 83, 83)),
                 filled: true,
-                fillColor: const Color(0xFF171717),
+                fillColor: isDarkMode ? const Color(0xFF171717) : Colors.white,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: 12,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.white12),
+                  borderSide: BorderSide(
+                      color: isDarkMode ? Colors.white12 : Colors.black12),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.white12),
+                  borderSide: BorderSide(
+                      color: isDarkMode ? Colors.white12 : Colors.black12),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.white54),
+                  borderSide: BorderSide(
+                      color: isDarkMode ? Colors.white54 : Colors.black54),
                 ),
                 suffixIcon: _controller.text.isNotEmpty
                     ? IconButton(
                         tooltip: 'Clear',
-                        icon: const Icon(Icons.clear, color: Colors.white54),
+                        icon: Icon(Icons.clear,
+                            color: isDarkMode ? Colors.white54 : Colors.black54),
                         onPressed: () {
                           setState(() {
                             _controller.clear();
@@ -199,8 +201,8 @@ class _CaptureMovieScreenState extends State<CaptureMovieScreen> {
                         },
                       ),
               ),
-              style: const TextStyle(color: Colors.white),
-              cursorColor: Colors.white70,
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+              cursorColor: isDarkMode ? Colors.white70 : Colors.black54,
               onChanged: (_) => setState(() {}),
             ),
           ),
@@ -218,40 +220,44 @@ class _CaptureMovieScreenState extends State<CaptureMovieScreen> {
                           ),
                         )
                       : _results.isEmpty
-                      ? _EmptyState(lastQuery: _lastQuery)
-                      : CustomScrollView(
-                          physics: const BouncingScrollPhysics(),
-                          slivers: [
-                            // 리스트 시작 전 상단 간격
-                            const SliverToBoxAdapter(
-                              child: SizedBox(height: 16),
-                            ),
+                          ? _EmptyState(lastQuery: _lastQuery)
+                          : CustomScrollView(
+                              physics: const BouncingScrollPhysics(),
+                              slivers: [
+                                // 리스트 시작 전 상단 간격
+                                const SliverToBoxAdapter(
+                                  child: SizedBox(height: 16),
+                                ),
 
-                            SliverPadding(
-                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 36),
-                              sliver: SliverList.separated(
-                                itemCount: _results.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(height: 10),
-                                itemBuilder: (context, index) {
-                                  final item = _results[index];
-                                  final heroTag = 'movie-card-${item.id}';
-                                  final key = _tileBoundaryKeys.putIfAbsent(
-                                    heroTag,
-                                    () => GlobalKey(),
-                                  );
-                                  return _ResultTile(
-                                    boundaryKey: key,
-                                    heroTag: heroTag,
-                                    item: item,
-                                    // ✅ 카드 탭 시 바로 이동
-                                    onTap: () => _goToCaption(item),
-                                  );
-                                },
-                              ),
+                                SliverPadding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      16, 0, 16, 36),
+                                  sliver: SliverList.separated(
+                                    itemCount: _results.length,
+                                    separatorBuilder: (_, __) =>
+                                        const SizedBox(height: 10),
+                                    itemBuilder: (context, index) {
+                                      final item = _results[index];
+                                      final heroTag = 'movie-card-${item.id}';
+                                      final key = _tileBoundaryKeys.putIfAbsent(
+                                        heroTag,
+                                        () => GlobalKey(),
+                                      );
+                                      return MediaResultCard(
+                                        boundaryKey: key,
+                                        heroTag: heroTag,
+                                        title: item.title,
+                                        typeLabel: item.isTvSeries ? 'TV series' : 'Movie',
+                                        yearLabel: extractYear(item.releaseDate),
+                                        imageUrl: item.posterUrl,
+                                        isMovie: true,
+                                        onTap: () => _goToCaption(item),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
                 ),
 
                 // 검색 폼 바로 아래 깔리는 고정 그라데이션
@@ -274,170 +280,20 @@ class _CaptureMovieScreenState extends State<CaptureMovieScreen> {
   }
 }
 
-/// 결과 타일 (포스터, 제목, 타입, 개봉일) + Hero + RepaintBoundary(스냅샷)
-class _ResultTile extends StatelessWidget {
-  const _ResultTile({
-    required this.boundaryKey,
-    required this.heroTag,
-    required this.item,
-    required this.onTap,
-  });
-
-  final GlobalKey boundaryKey;
-  final String heroTag;
-
-  final MovieItem item;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final typeLabel = item.isTvSeries ? 'TV series' : 'Movie';
-    final yearLabel = item.releaseDate?.isNotEmpty == true
-        ? extractYear(item.releaseDate)
-        : 'Unknown';
-
-    final card = RepaintBoundary(
-      // ⬅️ 비행 전 스냅샷 채취 대상
-      key: boundaryKey,
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF111111),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white10, width: 2),
-        ),
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          children: [
-            // 포스터
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: SizedBox(
-                width: 60,
-                height: 90, // 2:3 비율
-                child: item.posterUrl != null
-                    ? Image.network(
-                        item.posterUrl!,
-                        fit: BoxFit.cover,
-                        gaplessPlayback: true,
-                        filterQuality: FilterQuality.medium,
-                        errorBuilder: (_, __, ___) =>
-                            const _PosterPlaceholder(),
-                      )
-                    : const _PosterPlaceholder(),
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // 텍스트 영역
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 제목
-                  Text(
-                    item.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textWidthBasis: TextWidthBasis.parent,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // 타입 & 개봉일
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF222222),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          typeLabel,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        yearLabel,
-                        textWidthBasis: TextWidthBasis.parent,
-                        style: const TextStyle(
-                          color: Colors.white54,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Hero(
-        tag: heroTag,
-        // ⬇️ 비행 동안 '스냅샷'으로만 그리기 → 텍스트 재줄바꿈/덜컹 없음
-        flightShuttleBuilder: (context, animation, direction, fromCtx, toCtx) {
-          final bytes = HeroSnapshotStore.peek(heroTag);
-          if (bytes != null) {
-            return Image.memory(
-              bytes,
-              gaplessPlayback: true,
-              filterQuality: FilterQuality.medium,
-            );
-          }
-          // 스냅샷이 없으면 기본 위젯 (fallback)
-          return (direction == HeroFlightDirection.push
-              ? fromCtx.widget
-              : toCtx.widget);
-        },
-        placeholderBuilder: (_, __, child) =>
-            Opacity(opacity: 0.0, child: child),
-        child: Material(type: MaterialType.transparency, child: card),
-      ),
-    );
-  }
-}
-
-class _PosterPlaceholder extends StatelessWidget {
-  const _PosterPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF2A2A2A),
-      child: const Center(child: Icon(Icons.movie, color: Colors.white24)),
-    );
-  }
-}
-
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.lastQuery});
   final String lastQuery;
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final text = lastQuery.isEmpty
         ? 'Search movies or TV series by title.'
         : 'No results for “$lastQuery”.';
     return Center(
       child: Text(
         text,
-        style: const TextStyle(color: Colors.white38),
+        style: TextStyle(color: isDarkMode ? Colors.white38 : Colors.black38),
         textAlign: TextAlign.center,
       ),
     );

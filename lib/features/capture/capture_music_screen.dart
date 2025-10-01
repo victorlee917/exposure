@@ -1,5 +1,5 @@
-// lib/features/capture/capture_music_screen.dart
 import 'dart:ui' as ui;
+import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 
@@ -7,13 +7,8 @@ import 'caption_screen.dart';
 import 'capture_origin.dart'; // MusicOrigin 사용
 import 'capture_movie_screen.dart' show HeroSnapshotStore; // 스냅샷 저장소 재사용
 import 'package:daily_exposures/features/common/widgets/appbar_gradation.dart';
-
-// 연도만 뽑기(YYYY 또는 YYYY-MM-DD 대응)
-String _extractYear(String? date) {
-  if (date == null || date.isEmpty) return 'Unknown';
-  final m = RegExp(r'\b(\d{4})\b').firstMatch(date);
-  return m != null ? m.group(1)! : 'Unknown';
-}
+import 'package:daily_exposures/features/capture/widgets/media_result_card.dart';
+import 'package:daily_exposures/features/capture/widgets/utils.dart';
 
 /// ===== 데이터 모델 & 리포지토리 인터페이스 =====
 
@@ -169,6 +164,7 @@ class _CaptureMusicScreenState extends State<CaptureMusicScreen> {
 
   // 선택된 카드 스냅샷을 찍고 CaptionScreen으로 이동
   Future<void> _goToCaption(MusicItem sel) async {
+    print('Music _goToCaption called for item: ${sel.title}');
     final heroTag = 'music-card-${sel.id}';
     final key = _tileBoundaryKeys[heroTag];
 
@@ -211,12 +207,13 @@ class _CaptureMusicScreenState extends State<CaptureMusicScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.black,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.close),
@@ -241,29 +238,33 @@ class _CaptureMusicScreenState extends State<CaptureMusicScreen> {
               onSubmitted: _onSubmitted,
               decoration: InputDecoration(
                 hintText: 'Search music by title or artist',
-                hintStyle: const TextStyle(color: Colors.white38),
+                hintStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.black38),
                 filled: true,
-                fillColor: const Color(0xFF171717),
+                fillColor: isDarkMode ? const Color(0xFF171717) : Colors.white,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: 12,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.white12),
+                  borderSide: BorderSide(
+                      color: isDarkMode ? Colors.white12 : Colors.black12),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.white12),
+                  borderSide: BorderSide(
+                      color: isDarkMode ? Colors.white12 : Colors.black12),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.white54),
+                  borderSide: BorderSide(
+                      color: isDarkMode ? Colors.white54 : Colors.black54),
                 ),
                 suffixIcon: _controller.text.isNotEmpty
                     ? IconButton(
                         tooltip: 'Clear',
-                        icon: const Icon(Icons.clear, color: Colors.white54),
+                        icon: Icon(Icons.clear,
+                            color: isDarkMode ? Colors.white54 : Colors.black54),
                         onPressed: () {
                           setState(() {
                             _controller.clear();
@@ -282,7 +283,7 @@ class _CaptureMusicScreenState extends State<CaptureMusicScreen> {
                         },
                       ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
               cursorColor: Colors.white70,
               onChanged: (_) => setState(() {}),
             ),
@@ -293,40 +294,45 @@ class _CaptureMusicScreenState extends State<CaptureMusicScreen> {
             child: Stack(
               children: [
                 _loading
-                    ? const Center(
-                        child: CircularProgressIndicator(color: Colors.white70),
+                    ? Center(
+                        child: CircularProgressIndicator(color: isDarkMode ? Colors.white70 : Colors.black54),
                       )
                     : _results.isEmpty
-                    ? _EmptyState(lastQuery: _lastQuery)
-                    : CustomScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        slivers: [
-                          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                          SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 36),
-                            sliver: SliverList.separated(
-                              itemCount: _results.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(height: 10),
-                              itemBuilder: (context, index) {
-                                final item = _results[index];
-                                final heroTag = 'music-card-${item.id}';
-                                final key = _tileBoundaryKeys.putIfAbsent(
-                                  heroTag,
-                                  () => GlobalKey(),
-                                );
-                                return _ResultTile(
-                                  boundaryKey: key,
-                                  heroTag: heroTag,
-                                  item: item,
-                                  // ✅ 카드 탭 시 바로 이동
-                                  onTap: () => _goToCaption(item),
-                                );
-                              },
-                            ),
+                        ? _EmptyState(lastQuery: _lastQuery)
+                        : CustomScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            slivers: [
+                              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                              SliverPadding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    16, 0, 16, 36),
+                                sliver: SliverList.separated(
+                                  itemCount: _results.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 10),
+                                  itemBuilder: (context, index) {
+                                    final item = _results[index];
+                                    final heroTag = 'music-card-${item.id}';
+                                    final key = _tileBoundaryKeys.putIfAbsent(
+                                      heroTag,
+                                      () => GlobalKey(),
+                                    );
+                                    return MediaResultCard(
+                                      boundaryKey: key,
+                                      heroTag: heroTag,
+                                      title: item.title,
+                                      subtitle: item.artist,
+                                      typeLabel: item.isAlbum ? 'Album' : 'Track',
+                                      yearLabel: extractYear(item.releaseDate),
+                                      imageUrl: item.coverUrl,
+                                      isMovie: false,
+                                      onTap: () => _goToCaption(item),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
 
                 // 검색 폼 바로 아래 깔리는 고정 그라데이션
                 const Positioned(
@@ -348,173 +354,20 @@ class _CaptureMusicScreenState extends State<CaptureMusicScreen> {
   }
 }
 
-/// 결과 타일 (정사각 커버 + 제목/아티스트 + 타입&연도) + Hero + RepaintBoundary
-class _ResultTile extends StatelessWidget {
-  const _ResultTile({
-    required this.boundaryKey,
-    required this.heroTag,
-    required this.item,
-    required this.onTap,
-  });
-
-  final GlobalKey boundaryKey;
-  final String heroTag;
-  final MusicItem item;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final typeLabel = item.isAlbum ? 'Album' : 'Track';
-    final yearLabel = _extractYear(item.releaseDate);
-
-    final card = RepaintBoundary(
-      key: boundaryKey,
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF111111),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white10, width: 2),
-        ),
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          children: [
-            // 정사각 커버 64x64
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: SizedBox(
-                width: 64,
-                height: 64,
-                child: item.coverUrl != null
-                    ? Image.network(
-                        item.coverUrl!,
-                        fit: BoxFit.cover,
-                        gaplessPlayback: true,
-                        filterQuality: FilterQuality.medium,
-                        errorBuilder: (_, __, ___) =>
-                            const _SquarePlaceholder(icon: Icons.music_note),
-                      )
-                    : const _SquarePlaceholder(icon: Icons.music_note),
-              ),
-            ),
-            const SizedBox(width: 10),
-
-            // 텍스트
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  if ((item.artist ?? '').isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        item.artist!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF222222),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          typeLabel,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        yearLabel,
-                        style: const TextStyle(
-                          color: Colors.white54,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Hero(
-        tag: heroTag,
-        flightShuttleBuilder: (context, animation, direction, fromCtx, toCtx) {
-          final bytes = HeroSnapshotStore.peek(heroTag);
-          if (bytes != null) {
-            return Image.memory(
-              bytes,
-              gaplessPlayback: true,
-              filterQuality: FilterQuality.medium,
-            );
-          }
-          return direction == HeroFlightDirection.push
-              ? fromCtx.widget
-              : toCtx.widget;
-        },
-        placeholderBuilder: (_, __, child) =>
-            Opacity(opacity: 0.0, child: child),
-        child: Material(type: MaterialType.transparency, child: card),
-      ),
-    );
-  }
-}
-
-class _SquarePlaceholder extends StatelessWidget {
-  const _SquarePlaceholder({required this.icon});
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF2A2A2A),
-      child: Center(child: Icon(icon, color: Colors.white24)),
-    );
-  }
-}
-
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.lastQuery});
   final String lastQuery;
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final text = lastQuery.isEmpty
         ? 'Search music by title or artist.'
         : 'No results for “$lastQuery”.';
     return Center(
       child: Text(
         text,
-        style: const TextStyle(color: Colors.white38),
+        style: TextStyle(color: isDarkMode ? Colors.white38 : Colors.black38),
         textAlign: TextAlign.center,
       ),
     );
