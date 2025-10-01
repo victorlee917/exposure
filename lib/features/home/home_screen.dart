@@ -170,7 +170,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       started: "2023-02-01",
       ended: "In progress",
       developedAt: "Not yet",
-      type: "movie",
+      type: "music",
       isDeveloped: false,
       draftPage: 7,
     ),

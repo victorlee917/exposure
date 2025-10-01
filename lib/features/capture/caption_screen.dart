@@ -168,17 +168,20 @@ class _HeaderByOrigin extends StatelessWidget {
           MediaQuery.of(context).size.width * 0.6,
           180,
         );
-        return SizedBox(
-          width: width,
-          child: AspectRatio(
-            aspectRatio: 2 / 3,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: AssetEntityImage(
-                entity,
-                isOriginal: false,
-                thumbnailSize: const ThumbnailSize(1500, 1500),
-                fit: BoxFit.cover,
+        return Hero(
+          tag: origin.heroTag,
+          child: SizedBox(
+            width: width,
+            child: AspectRatio(
+              aspectRatio: 2 / 3,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: AssetEntityImage(
+                  entity,
+                  isOriginal: false,
+                  thumbnailSize: const ThumbnailSize(1500, 1500),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
