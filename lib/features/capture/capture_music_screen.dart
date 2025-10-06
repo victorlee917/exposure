@@ -1,5 +1,4 @@
 import 'dart:ui' as ui;
-import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 
@@ -238,7 +237,9 @@ class _CaptureMusicScreenState extends State<CaptureMusicScreen> {
               onSubmitted: _onSubmitted,
               decoration: InputDecoration(
                 hintText: 'Search music by title or artist',
-                hintStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.black38),
+                hintStyle: TextStyle(
+                  color: isDarkMode ? Colors.white38 : Colors.black38,
+                ),
                 filled: true,
                 fillColor: isDarkMode ? const Color(0xFF171717) : Colors.white,
                 contentPadding: const EdgeInsets.symmetric(
@@ -248,23 +249,28 @@ class _CaptureMusicScreenState extends State<CaptureMusicScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
-                      color: isDarkMode ? Colors.white12 : Colors.black12),
+                    color: isDarkMode ? Colors.white12 : Colors.black12,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
-                      color: isDarkMode ? Colors.white12 : Colors.black12),
+                    color: isDarkMode ? Colors.white12 : Colors.black12,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
-                      color: isDarkMode ? Colors.white54 : Colors.black54),
+                    color: isDarkMode ? Colors.white54 : Colors.black54,
+                  ),
                 ),
                 suffixIcon: _controller.text.isNotEmpty
                     ? IconButton(
                         tooltip: 'Clear',
-                        icon: Icon(Icons.clear,
-                            color: isDarkMode ? Colors.white54 : Colors.black54),
+                        icon: Icon(
+                          Icons.clear,
+                          color: isDarkMode ? Colors.white54 : Colors.black54,
+                        ),
                         onPressed: () {
                           setState(() {
                             _controller.clear();
@@ -295,44 +301,45 @@ class _CaptureMusicScreenState extends State<CaptureMusicScreen> {
               children: [
                 _loading
                     ? Center(
-                        child: CircularProgressIndicator(color: isDarkMode ? Colors.white70 : Colors.black54),
+                        child: CircularProgressIndicator(
+                          color: isDarkMode ? Colors.white70 : Colors.black54,
+                        ),
                       )
                     : _results.isEmpty
-                        ? _EmptyState(lastQuery: _lastQuery)
-                        : CustomScrollView(
-                            physics: const BouncingScrollPhysics(),
-                            slivers: [
-                              const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                              SliverPadding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    16, 0, 16, 36),
-                                sliver: SliverList.separated(
-                                  itemCount: _results.length,
-                                  separatorBuilder: (_, __) =>
-                                      const SizedBox(height: 10),
-                                  itemBuilder: (context, index) {
-                                    final item = _results[index];
-                                    final heroTag = 'music-card-${item.id}';
-                                    final key = _tileBoundaryKeys.putIfAbsent(
-                                      heroTag,
-                                      () => GlobalKey(),
-                                    );
-                                    return MediaResultCard(
-                                      boundaryKey: key,
-                                      heroTag: heroTag,
-                                      title: item.title,
-                                      subtitle: item.artist,
-                                      typeLabel: item.isAlbum ? 'Album' : 'Track',
-                                      yearLabel: extractYear(item.releaseDate),
-                                      imageUrl: item.coverUrl,
-                                      isMovie: false,
-                                      onTap: () => _goToCaption(item),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
+                    ? _EmptyState(lastQuery: _lastQuery)
+                    : CustomScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        slivers: [
+                          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 36),
+                            sliver: SliverList.separated(
+                              itemCount: _results.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 10),
+                              itemBuilder: (context, index) {
+                                final item = _results[index];
+                                final heroTag = 'music-card-${item.id}';
+                                final key = _tileBoundaryKeys.putIfAbsent(
+                                  heroTag,
+                                  () => GlobalKey(),
+                                );
+                                return MediaResultCard(
+                                  boundaryKey: key,
+                                  heroTag: heroTag,
+                                  title: item.title,
+                                  subtitle: item.artist,
+                                  typeLabel: item.isAlbum ? 'Album' : 'Track',
+                                  yearLabel: extractYear(item.releaseDate),
+                                  imageUrl: item.coverUrl,
+                                  isMovie: false,
+                                  onTap: () => _goToCaption(item),
+                                );
+                              },
+                            ),
                           ),
+                        ],
+                      ),
 
                 // 검색 폼 바로 아래 깔리는 고정 그라데이션
                 const Positioned(

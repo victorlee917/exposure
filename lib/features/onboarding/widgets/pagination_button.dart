@@ -1,4 +1,3 @@
-import 'package:daily_exposures/constants/borders.dart';
 import 'package:daily_exposures/constants/fonts.dart';
 import 'package:daily_exposures/constants/sizes.dart';
 import 'package:flutter/material.dart';
@@ -20,10 +19,10 @@ class PaginationButton extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isRight ? Colors.black : Colors.transparent,
-        border: Border.all(
-          color: isRight ? Borders.buttonColorDefault : Colors.transparent,
-        ),
-        borderRadius: BorderRadius.circular(Borders.buttonRadius),
+        // border: Border.all(
+        //   color: isRight ? Borders.buttonColorDefault : Colors.transparent,
+        // ),
+        // borderRadius: BorderRadius.circular(Borders.buttonRadius),
       ),
       child: Text(
         text,

@@ -1,5 +1,10 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:daily_exposures/constants/paddings.dart';
+import 'package:daily_exposures/constants/rvalues.dart';
+import 'package:daily_exposures/constants/sizes.dart';
+import 'package:daily_exposures/features/common/widgets/text_roll_description.dart';
+import 'package:daily_exposures/features/common/widgets/text_roll_title.dart';
 import 'package:flutter/material.dart';
 
 import 'new_roll_create_screen.dart';
@@ -337,6 +342,19 @@ class _NewRollScreenState extends State<NewRollScreen> {
   Widget _bottomOverlay(BuildContext context) {
     const double kStateRowHeight = 36;
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    // 테마 기반 색상 정의
+    final primaryTextColor = isDarkMode ? Colors.white : Colors.black;
+    final secondaryTextColor = isDarkMode ? Colors.white70 : Colors.black54;
+    final tertiaryTextColor = isDarkMode ? Colors.white54 : Colors.black45;
+    final dropdownBgColor = isDarkMode
+        ? Colors.white.withOpacity(0.10)
+        : Colors.black.withOpacity(0.05);
+    final dropdownBorderColor = isDarkMode ? Colors.white24 : Colors.black12;
+    final dropdownMenuColor = isDarkMode ? Colors.black87 : Colors.white;
+    final ctaButtonBgColor = isDarkMode ? Colors.white : Colors.black;
+    final ctaButtonFgColor = isDarkMode ? Colors.black : Colors.white;
 
     final title = _pageTitles[_activeDataIndex % _pageTitles.length];
     final desc = _pageDescriptions[_activeDataIndex % _pageDescriptions.length];
@@ -350,14 +368,14 @@ class _NewRollScreenState extends State<NewRollScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('EXP', style: TextStyle(color: Colors.white70)),
+            Text('EXP', style: TextStyle(color: secondaryTextColor)),
             const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.10),
+                color: dropdownBgColor,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white24),
+                border: Border.all(color: dropdownBorderColor),
               ),
               child: DropdownButtonHideUnderline(
                 child: SizedBox(
@@ -365,11 +383,11 @@ class _NewRollScreenState extends State<NewRollScreen> {
                   child: DropdownButton<int>(
                     isDense: true,
                     value: exp,
-                    dropdownColor: Colors.black87,
-                    iconEnabledColor: Colors.white,
+                    dropdownColor: dropdownMenuColor,
+                    iconEnabledColor: primaryTextColor,
                     iconSize: 18,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: primaryTextColor,
                       fontSize: 14,
                       height: 1.1,
                     ),
@@ -397,7 +415,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
           children: [
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
+                foregroundColor: primaryTextColor,
                 minimumSize: Size.zero,
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -409,11 +427,11 @@ class _NewRollScreenState extends State<NewRollScreen> {
               ),
             ),
             const SizedBox(width: 6),
-            const Text('|', style: TextStyle(color: Colors.white54)),
+            Text('|', style: TextStyle(color: tertiaryTextColor)),
             const SizedBox(width: 6),
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
+                foregroundColor: primaryTextColor,
                 minimumSize: Size.zero,
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -431,7 +449,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
 
     final ctaLabel = purchased ? 'Create' : 'Purchase';
 
-    Widget fadeSwitcher(Text child, String keyId) {
+    Widget fadeSwitcher(Widget child, String keyId) {
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 260),
         switchInCurve: Curves.easeInOut,
@@ -448,7 +466,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
         transitionBuilder: (child, anim) =>
             FadeTransition(opacity: anim, child: child),
         child: KeyedSubtree(
-          key: ValueKey('$keyId-${child.data}'),
+          key: ValueKey('$keyId-${child.hashCode}'),
           child: child,
         ),
       );
@@ -457,44 +475,30 @@ class _NewRollScreenState extends State<NewRollScreen> {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+        padding: const EdgeInsets.fromLTRB(
+          Paddings.screentHorizontal,
+          0,
+          Paddings.screentHorizontal,
+          32,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(key: _markerKey, height: 0),
-            fadeSwitcher(
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              'title',
-            ),
+            fadeSwitcher(TextRollTitle(text: title), 'title'),
             const SizedBox(height: 8),
-            fadeSwitcher(
-              Text(
-                desc,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withOpacity(0.9),
-                ),
-              ),
-              'desc',
-            ),
+            fadeSwitcher(TextRollDescription(text: desc), 'desc'),
             const SizedBox(height: 14),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeOutCubic,
-              child: KeyedSubtree(
-                key: ValueKey('state-$purchased-$_activeDataIndex'),
-                child: stateArea,
-              ),
-            ),
+            // AnimatedSwitcher(
+            //   duration: const Duration(milliseconds: 220),
+            //   switchInCurve: Curves.easeOutCubic,
+            //   switchOutCurve: Curves.easeOutCubic,
+            //   child: KeyedSubtree(
+            //     key: ValueKey('state-$purchased-$_activeDataIndex'),
+            //     child: stateArea,
+            //   ),
+            // ),
             const SizedBox(height: 18),
             // CTA 버튼 (Hero 유지)
             Hero(
@@ -502,13 +506,13 @@ class _NewRollScreenState extends State<NewRollScreen> {
               flightShuttleBuilder: _materialShuttle,
               child: SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: Sizes.sizeButtonHeight,
                 child: FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
+                    backgroundColor: ctaButtonBgColor,
+                    foregroundColor: ctaButtonFgColor,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(Rvalues.button),
                     ),
                   ),
                   onPressed: () {
@@ -546,18 +550,28 @@ class _NewRollScreenState extends State<NewRollScreen> {
   }
 
   // 하단 원형 그라데이션
-  Widget _bottomCircularGradient() {
+  Widget _bottomCircularGradient(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final List<Color> gradientColors = isDarkMode
+        ? [
+            Colors.black.withOpacity(0.95),
+            Colors.black.withOpacity(0.55),
+            Colors.black.withOpacity(0.18),
+            Colors.transparent,
+          ]
+        : [
+            Colors.white.withOpacity(0.95),
+            Colors.white.withOpacity(0.55),
+            Colors.white.withOpacity(0.20),
+            Colors.white.withOpacity(0.0),
+          ];
+
     return IgnorePointer(
       ignoring: true,
       child: CustomPaint(
         painter: _BottomCircleGradientPainter(
           radiusPx: _radiusPx,
-          colors: [
-            Colors.black.withOpacity(0.95),
-            Colors.black.withOpacity(0.55),
-            Colors.black.withOpacity(0.18),
-            Colors.transparent,
-          ],
+          colors: gradientColors,
           stops: const [0.0, 0.45, 0.75, 1.0],
         ),
         size: Size.infinite,
@@ -630,7 +644,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
       body: Stack(
         children: [
           frozenLayer, // 동결 가능한 메인 컨텐츠
-          Positioned.fill(child: _bottomCircularGradient()),
+          Positioned.fill(child: _bottomCircularGradient(context)),
           Positioned(
             left: 0,
             right: 0,

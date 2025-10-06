@@ -1,3 +1,8 @@
+import 'package:daily_exposures/constants/borders.dart';
+import 'package:daily_exposures/constants/sizes.dart';
+import 'package:daily_exposures/features/common/widgets/text_chip.dart';
+import 'package:daily_exposures/features/common/widgets/text_roll_description.dart';
+import 'package:daily_exposures/features/common/widgets/text_roll_title.dart';
 import 'package:daily_exposures/features/home/widgets/roll.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -54,12 +59,7 @@ class FilmRollView extends StatelessWidget {
             children: [
               _BadgeChip(
                 radius: _kCardRadius,
-                child: Text(
-                  'DEVELOPED',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(color: Colors.white),
-                ),
+                child: TextChip(text: 'DEVELOPED'),
               ),
               const SizedBox(width: 8),
               _BadgeChip(
@@ -122,14 +122,9 @@ class FilmRollView extends StatelessWidget {
                       opacity: diff.abs() < 0.5 ? 1.0 : 0.0,
                       child: Column(
                         children: [
-                          Text(
-                            'Film Roll ${rollIndex + 1}',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          Text(
-                            'This is a description.',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
+                          TextRollTitle(text: 'Film Roll ${rollIndex + 1}'),
+                          SizedBox(height: Sizes.size8),
+                          TextRollDescription(text: 'This is a description.'),
                           const SizedBox(height: 16),
                           IntrinsicHeight(
                             child: Row(
@@ -229,12 +224,15 @@ class _BadgeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final core = Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xE6000000),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(
+          color: isDarkMode ? Borders.lineColorDark : Borders.lineColorLight,
+        ),
       ),
       child: Center(child: child),
     );
@@ -271,12 +269,7 @@ class _ExpGaugeChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            'EXP.',
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: Colors.white),
-          ),
+          TextChip(text: 'EXP.'),
           const SizedBox(width: 8),
           SizedBox(
             width: barW,

@@ -1,4 +1,3 @@
-import 'package:daily_exposures/constants/borders.dart';
 import 'package:daily_exposures/constants/fonts.dart';
 import 'package:daily_exposures/constants/paddings.dart';
 import 'package:daily_exposures/constants/rvalues.dart';
@@ -34,7 +33,7 @@ class SocialLoginButton extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(
               color: Colors.grey.shade200,
-              width: Borders.buttonWidth,
+              // width: Borders.buttonWidth,
             ),
             borderRadius: BorderRadius.circular(Rvalues.button),
           ),

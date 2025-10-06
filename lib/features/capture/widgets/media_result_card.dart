@@ -1,5 +1,5 @@
-import 'package:daily_exposures/features/capture/capture_movie_screen.dart' show HeroSnapshotStore;
-import 'package:daily_exposures/features/capture/widgets/utils.dart';
+import 'package:daily_exposures/features/capture/capture_movie_screen.dart'
+    show HeroSnapshotStore;
 import 'package:flutter/material.dart';
 
 class MediaResultCard extends StatelessWidget {
@@ -29,7 +29,9 @@ class MediaResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    print('MediaResultCard build: heroTag=$heroTag, imageUrl=$imageUrl, onTap=${onTap != null}');
+    print(
+      'MediaResultCard build: heroTag=$heroTag, imageUrl=$imageUrl, onTap=${onTap != null}',
+    );
 
     final cardContent = RepaintBoundary(
       key: boundaryKey,
@@ -38,7 +40,9 @@ class MediaResultCard extends StatelessWidget {
           color: isDarkMode ? const Color(0xFF111111) : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-              color: isDarkMode ? Colors.white10 : Colors.black12, width: 2),
+            color: isDarkMode ? Colors.white10 : Colors.black12,
+            width: 2,
+          ),
         ),
         padding: const EdgeInsets.all(10),
         child: Row(
@@ -60,10 +64,7 @@ class MediaResultCard extends StatelessWidget {
                           isDarkMode: isDarkMode,
                         ),
                       )
-                    : _Placeholder(
-                        isMovie: isMovie,
-                        isDarkMode: isDarkMode,
-                      ),
+                    : _Placeholder(isMovie: isMovie, isDarkMode: isDarkMode),
               ),
             ),
             SizedBox(width: isMovie ? 12 : 10),
@@ -110,7 +111,9 @@ class MediaResultCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: isDarkMode
                               ? const Color(0xFF222222)
-                              : (isMovie ? const Color(0xFFEFEFEF) : Colors.white),
+                              : (isMovie
+                                    ? const Color(0xFFEFEFEF)
+                                    : Colors.white),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(

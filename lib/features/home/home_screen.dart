@@ -427,9 +427,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(kToolbarHeight),
             child: AppBar(
-              backgroundColor: Colors.black,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              surfaceTintColor: Colors.transparent,
               elevation: 0,
-              surfaceTintColor: Colors.black,
               leading: IconButton(
                 icon: FaIcon(
                   FontAwesomeIcons.film,

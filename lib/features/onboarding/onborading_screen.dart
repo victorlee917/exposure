@@ -1,4 +1,3 @@
-import 'package:daily_exposures/constants/borders.dart';
 import 'package:daily_exposures/constants/gaps.dart';
 import 'package:daily_exposures/constants/paddings.dart';
 import 'package:daily_exposures/constants/sizes.dart';
@@ -96,8 +95,8 @@ class _OnboradingScreenState extends State<OnboradingScreen> {
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: Borders.lineColorDefault,
-              width: Borders.lineWidth,
+              // color: Borders.lineColorDefault,
+              // width: Borders.lineWidth,
             ),
           ),
         ),

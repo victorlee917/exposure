@@ -1,4 +1,10 @@
+import 'package:daily_exposures/constants/borders.dart';
+import 'package:daily_exposures/constants/fonts.dart';
+import 'package:daily_exposures/constants/paddings.dart';
+import 'package:daily_exposures/constants/rvalues.dart';
+import 'package:daily_exposures/constants/sizes.dart';
 import 'package:daily_exposures/features/common/widgets/appbar_gradation.dart';
+import 'package:daily_exposures/features/my/widgets/list_label.dart';
 import 'package:daily_exposures/features/username/change_username_screen.dart';
 import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +62,8 @@ class _MyScreenState extends State<MyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSystemDarkMode =
+        Theme.of(context).brightness == Brightness.dark;
     return Theme(
       data: Theme.of(context).copyWith(
         highlightColor: Colors.transparent,
@@ -86,25 +94,32 @@ class _MyScreenState extends State<MyScreen> {
             // 본문
             ListView(
               padding: const EdgeInsets.only(
-                top: 40,
-                bottom: 16,
-                left: 24,
-                right: 24,
+                top: 60,
+                bottom: Paddings.buttonVertical,
+                left: Paddings.screentHorizontal,
+                right: Paddings.screentHorizontal,
               ),
               children: [
                 const Text(
                   "Hello,\nnickname",
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 28, fontWeight: Fonts.weightHeavy),
                 ),
                 const SizedBox(height: 20),
                 ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  minTileHeight: Sizes.sizeButtonHeight,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: Paddings.buttonHorizontal,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Theme.of(context).dividerColor),
+                    borderRadius: BorderRadius.circular(Rvalues.button),
+                    side: BorderSide(
+                      color: isSystemDarkMode
+                          ? Borders.lineColorDark
+                          : Borders.lineColorLight,
+                    ),
                   ),
                   title: const Text("exposure.link/nickname"),
-                  trailing: const FaIcon(FontAwesomeIcons.share, size: 20),
+                  trailing: const FaIcon(FontAwesomeIcons.share, size: 16),
                   onTap: () {
                     Share.share("exposure.link/nickname");
                   },
@@ -112,7 +127,7 @@ class _MyScreenState extends State<MyScreen> {
                 const SizedBox(height: 20),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: const Text("Change nickname"),
+                  title: const ListLabel(text: "Change nickname"),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -126,7 +141,7 @@ class _MyScreenState extends State<MyScreen> {
                   builder: (context, value, child) {
                     return SwitchListTile.adaptive(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                      title: const Text("Dark mode"),
+                      title: const ListLabel(text: "Dark mode"),
                       value: value,
                       onChanged: (newValue) {
                         isDarkMode.value = newValue;
@@ -139,7 +154,7 @@ class _MyScreenState extends State<MyScreen> {
                   builder: (context, isLeftHanded, child) {
                     return SwitchListTile.adaptive(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                      title: const Text("Left-handed mode"),
+                      title: ListLabel(text: "Left-handed mode"),
                       value: isLeftHanded,
                       onChanged: (value) {
                         isLeftHandedMode.value = value;
@@ -149,7 +164,7 @@ class _MyScreenState extends State<MyScreen> {
                 ),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: const Text("Rate our App"),
+                  title: ListLabel(text: "Rate our App"),
                   onTap: () async {
                     final InAppReview inAppReview = InAppReview.instance;
                     if (await inAppReview.isAvailable()) {
@@ -159,52 +174,40 @@ class _MyScreenState extends State<MyScreen> {
                 ),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: const Text("Exposure Instagram"),
+                  title: ListLabel(text: "Exposure Instagram"),
                   onTap: () {},
                 ),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: const Text("Privacy Policy"),
+                  title: ListLabel(text: "Privacy Policy"),
                   onTap: () {},
                 ),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: const Text("Terms of Service"),
+                  title: ListLabel(text: "Terms of Service"),
                   onTap: () {},
                 ),
-                const Divider(),
+                Divider(
+                  color: isSystemDarkMode
+                      ? Borders.lineColorDark
+                      : Borders.lineColorLight,
+                ),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: const Text("Logout"),
+                  title: ListLabel(text: "Logout"),
                   onTap: () {},
                 ),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: Text(
-                    "Delete Account",
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                  title: ListLabel(
+                    text: "Delete Account",
+                    textColor: Colors.red,
                   ),
                   onTap: () {},
                 ),
               ],
             ),
 
-            // 상단 그라데이션
-            // Container(
-            //   height: 40,
-            //   decoration: BoxDecoration(
-            //     gradient: LinearGradient(
-            //       begin: Alignment.topCenter,
-            //       end: Alignment.bottomCenter,
-            //       colors: [
-            //         Theme.of(context).scaffoldBackgroundColor,
-            //         Theme.of(context).scaffoldBackgroundColor.withAlpha(0),
-            //       ],
-            //     ),
-            //   ),
-            // ),
             const Positioned(
               top: 0,
               left: 0,

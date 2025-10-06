@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:daily_exposures/features/common/widgets/appbar_gradation.dart';
-import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 
@@ -156,7 +155,9 @@ class _CaptureMovieScreenState extends State<CaptureMovieScreen> {
               onSubmitted: _onSubmitted,
               decoration: InputDecoration(
                 hintText: 'Search movies or TV series by name',
-                hintStyle: const TextStyle(color: ui.Color.fromARGB(97, 177, 83, 83)),
+                hintStyle: const TextStyle(
+                  color: ui.Color.fromARGB(97, 177, 83, 83),
+                ),
                 filled: true,
                 fillColor: isDarkMode ? const Color(0xFF171717) : Colors.white,
                 contentPadding: const EdgeInsets.symmetric(
@@ -166,23 +167,28 @@ class _CaptureMovieScreenState extends State<CaptureMovieScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
-                      color: isDarkMode ? Colors.white12 : Colors.black12),
+                    color: isDarkMode ? Colors.white12 : Colors.black12,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
-                      color: isDarkMode ? Colors.white12 : Colors.black12),
+                    color: isDarkMode ? Colors.white12 : Colors.black12,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
-                      color: isDarkMode ? Colors.white54 : Colors.black54),
+                    color: isDarkMode ? Colors.white54 : Colors.black54,
+                  ),
                 ),
                 suffixIcon: _controller.text.isNotEmpty
                     ? IconButton(
                         tooltip: 'Clear',
-                        icon: Icon(Icons.clear,
-                            color: isDarkMode ? Colors.white54 : Colors.black54),
+                        icon: Icon(
+                          Icons.clear,
+                          color: isDarkMode ? Colors.white54 : Colors.black54,
+                        ),
                         onPressed: () {
                           setState(() {
                             _controller.clear();
@@ -220,44 +226,45 @@ class _CaptureMovieScreenState extends State<CaptureMovieScreen> {
                           ),
                         )
                       : _results.isEmpty
-                          ? _EmptyState(lastQuery: _lastQuery)
-                          : CustomScrollView(
-                              physics: const BouncingScrollPhysics(),
-                              slivers: [
-                                // 리스트 시작 전 상단 간격
-                                const SliverToBoxAdapter(
-                                  child: SizedBox(height: 16),
-                                ),
-
-                                SliverPadding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                      16, 0, 16, 36),
-                                  sliver: SliverList.separated(
-                                    itemCount: _results.length,
-                                    separatorBuilder: (_, __) =>
-                                        const SizedBox(height: 10),
-                                    itemBuilder: (context, index) {
-                                      final item = _results[index];
-                                      final heroTag = 'movie-card-${item.id}';
-                                      final key = _tileBoundaryKeys.putIfAbsent(
-                                        heroTag,
-                                        () => GlobalKey(),
-                                      );
-                                      return MediaResultCard(
-                                        boundaryKey: key,
-                                        heroTag: heroTag,
-                                        title: item.title,
-                                        typeLabel: item.isTvSeries ? 'TV series' : 'Movie',
-                                        yearLabel: extractYear(item.releaseDate),
-                                        imageUrl: item.posterUrl,
-                                        isMovie: true,
-                                        onTap: () => _goToCaption(item),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
+                      ? _EmptyState(lastQuery: _lastQuery)
+                      : CustomScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          slivers: [
+                            // 리스트 시작 전 상단 간격
+                            const SliverToBoxAdapter(
+                              child: SizedBox(height: 16),
                             ),
+
+                            SliverPadding(
+                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 36),
+                              sliver: SliverList.separated(
+                                itemCount: _results.length,
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(height: 10),
+                                itemBuilder: (context, index) {
+                                  final item = _results[index];
+                                  final heroTag = 'movie-card-${item.id}';
+                                  final key = _tileBoundaryKeys.putIfAbsent(
+                                    heroTag,
+                                    () => GlobalKey(),
+                                  );
+                                  return MediaResultCard(
+                                    boundaryKey: key,
+                                    heroTag: heroTag,
+                                    title: item.title,
+                                    typeLabel: item.isTvSeries
+                                        ? 'TV series'
+                                        : 'Movie',
+                                    yearLabel: extractYear(item.releaseDate),
+                                    imageUrl: item.posterUrl,
+                                    isMovie: true,
+                                    onTap: () => _goToCaption(item),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
 
                 // 검색 폼 바로 아래 깔리는 고정 그라데이션

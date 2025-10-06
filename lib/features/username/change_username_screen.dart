@@ -1,5 +1,6 @@
 import 'package:daily_exposures/constants/fonts.dart';
 import 'package:daily_exposures/constants/paddings.dart';
+import 'package:daily_exposures/constants/rvalues.dart';
 import 'package:daily_exposures/constants/sizes.dart';
 import 'package:daily_exposures/constants/gaps.dart';
 import 'package:flutter/material.dart';
@@ -108,6 +109,7 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
         ),
         child: SizedBox(
           width: double.infinity,
+          height: Sizes.sizeButtonHeight,
           child: ElevatedButton(
             onPressed: _isUsernameValid
                 ? () {
@@ -126,7 +128,7 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
                 vertical: Paddings.buttonVertical,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Rvalues.button),
               ),
             ),
             child: Text(

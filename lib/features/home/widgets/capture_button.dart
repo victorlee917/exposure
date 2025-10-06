@@ -1,4 +1,5 @@
 // lib/features/home/widgets/capture_button.dart
+import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -16,6 +17,7 @@ class CaptureButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    isDarkMode.value = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onPressed,
@@ -25,7 +27,7 @@ class CaptureButton extends StatelessWidget {
           (
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: Colors.black,
               borderRadius: BorderRadius.circular(30),
               // boxShadow: []  // ← 삭제(그림자 원인)
             ),

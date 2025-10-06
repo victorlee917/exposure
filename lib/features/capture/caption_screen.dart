@@ -1,14 +1,9 @@
 import 'dart:math' as math;
-import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
 import 'package:daily_exposures/features/capture/capture_origin.dart';
-import 'package:daily_exposures/features/capture/capture_music_screen.dart'
-    show MusicItem;
-import 'package:daily_exposures/features/capture/capture_movie_screen.dart'
-    show MovieItem, HeroSnapshotStore;
 import 'package:daily_exposures/features/capture/widgets/media_result_card.dart';
 import 'package:daily_exposures/features/capture/widgets/utils.dart';
 
@@ -46,7 +41,6 @@ class _CaptionScreenState extends State<CaptionScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
@@ -94,7 +88,7 @@ class _CaptionScreenState extends State<CaptionScreen> {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final kb = MediaQuery.of(context).viewInsets.bottom;
-        
+
                   return AnimatedPadding(
                     padding: EdgeInsets.only(bottom: kb),
                     duration: const Duration(milliseconds: 180),
@@ -105,9 +99,7 @@ class _CaptionScreenState extends State<CaptionScreen> {
                         physics: const ClampingScrollPhysics(),
                         keyboardDismissBehavior:
                             ScrollViewKeyboardDismissBehavior.onDrag,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
                             minHeight: constraints.maxHeight - 24,
@@ -125,8 +117,9 @@ class _CaptionScreenState extends State<CaptionScreen> {
                               fontSize: 16,
                               height: 1.35,
                             ),
-                            cursorColor:
-                                isDarkMode ? Colors.white70 : Colors.black54,
+                            cursorColor: isDarkMode
+                                ? Colors.white70
+                                : Colors.black54,
                             scrollPadding: EdgeInsets.zero,
                             decoration: InputDecoration(
                               border: InputBorder.none,
@@ -134,9 +127,10 @@ class _CaptionScreenState extends State<CaptionScreen> {
                               contentPadding: EdgeInsets.zero,
                               hintText: 'Write a caption...',
                               hintStyle: TextStyle(
-                                  color: isDarkMode
-                                      ? Colors.white38
-                                      : Colors.black38),
+                                color: isDarkMode
+                                    ? Colors.white38
+                                    : Colors.black38,
+                              ),
                             ),
                             onEditingComplete: () => _focusNode.requestFocus(),
                             onTapOutside: (_) => _focusNode.requestFocus(),
@@ -217,11 +211,9 @@ class _NoBounceScrollBehavior extends ScrollBehavior {
     BuildContext context,
     Widget child,
     ScrollableDetails details,
-  ) =>
-      child;
+  ) => child;
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) =>
       const ClampingScrollPhysics();
 }
-
