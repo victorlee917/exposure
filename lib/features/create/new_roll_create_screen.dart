@@ -1,4 +1,8 @@
 import 'dart:math' as math;
+import 'package:daily_exposures/constants/borders.dart';
+import 'package:daily_exposures/constants/paddings.dart';
+import 'package:daily_exposures/constants/rvalues.dart';
+import 'package:daily_exposures/features/common/widgets/primary_text_field.dart';
 import 'package:flutter/material.dart';
 
 class NewRollCreateScreen extends StatefulWidget {
@@ -23,8 +27,11 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
   final _titleFocus = FocusNode();
   final _subtitleFocus = FocusNode();
 
+  int _selectedExposure = 12;
+
   // EXP 툴팁용
   final GlobalKey _expBadgeKey = GlobalKey();
+  final GlobalKey _exposureInfoKey = GlobalKey();
   OverlayEntry? _tooltipEntry;
 
   // 간격
@@ -63,7 +70,7 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
         flightShuttleBuilder: _materialShuttle,
         child: AppBar(
           automaticallyImplyLeading: false,
-          title: const Text('New Roll'),
+          title: Text(widget.rollTitle),
           centerTitle: true,
           actions: [
             IconButton(
@@ -78,13 +85,13 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
   }
 
   // ── Tooltip Overlay (플로팅, 자동 dismiss 없음, X/바깥탭으로 닫힘) ──
-  void _showTooltip() {
+  void _showTooltip(GlobalKey anchorKey, String text) {
     _removeTooltip();
 
     final overlay = Overlay.of(context);
 
     final renderBox =
-        _expBadgeKey.currentContext?.findRenderObject() as RenderBox?;
+        anchorKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null || !renderBox.hasSize) return;
 
     final mq = MediaQuery.of(context);
@@ -127,10 +134,7 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
               top: tipTop,
               left: tipLeft,
               width: maxWidth,
-              child: _TooltipBubble(
-                text: 'Developing requires ${widget.exp} Moments.',
-                onClose: _removeTooltip,
-              ),
+              child: _TooltipBubble(text: text, onClose: _removeTooltip),
             ),
           ],
         );
@@ -148,6 +152,7 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       resizeToAvoidBottomInset: false, // 버튼을 직접 배치
       appBar: _buildHeroAppBar(),
@@ -175,78 +180,99 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 헤더: Roll 제목 + EXP 배지(안에 인포 아이콘)
+                        // Exposure selection
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Expanded(
-                              child: Text(
-                                widget.rollTitle,
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.w800),
-                              ),
+                            Row(
+                              children: [
+                                const Text(
+                                  'Exposure',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                InkResponse(
+                                  key: _exposureInfoKey,
+                                  radius: 14,
+                                  onTap: () => _showTooltip(
+                                    _exposureInfoKey,
+                                    'Developing requires ${widget.exp} Moments.',
+                                  ),
+                                  child: Icon(
+                                    Icons.info_outline,
+                                    size: 14,
+                                    color: isDarkMode
+                                        ? Colors.white70
+                                        : Colors.black87,
+                                  ),
+                                ),
+                              ],
                             ),
                             Container(
-                              key: _expBadgeKey,
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
+                                horizontal: Paddings.buttonHorizontal,
+                                vertical: Paddings.buttonVertical,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Colors.white24),
+                                borderRadius: BorderRadius.circular(
+                                  Rvalues.button,
+                                ),
+                                border: Border.all(
+                                  color: isDarkMode
+                                      ? Borders.lineColorDark
+                                      : Borders.lineColorLight,
+                                  width: 1,
+                                ),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '${widget.exp} EXP',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  // 칩 안쪽 info 아이콘
-                                  InkResponse(
-                                    radius: 14,
-                                    onTap: _showTooltip,
-                                    child: const Icon(
-                                      Icons.info_outline,
-                                      size: 16,
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
+                              child: DropdownButton<int>(
+                                value: _selectedExposure,
+                                items: [12, 24, 36].map((int value) {
+                                  return DropdownMenuItem<int>(
+                                    value: value,
+                                    child: Text(value.toString()),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    _selectedExposure = newValue!;
+                                  });
+                                },
+                                underline: Container(), // Remove underline
+                                icon: const Icon(Icons.arrow_drop_down),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                                dropdownColor: Theme.of(
+                                  context,
+                                ).scaffoldBackgroundColor,
                               ),
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 20),
+
                         // Title
-                        TextField(
-                          autocorrect: false,
+                        PrimaryTextField(
                           controller: _titleCtl,
                           focusNode: _titleFocus,
                           textInputAction: TextInputAction.next,
                           onSubmitted: (_) => _subtitleFocus.requestFocus(),
-                          decoration: const InputDecoration(
-                            labelText: 'Title',
-                            border: OutlineInputBorder(),
-                          ),
+                          labelText: 'Title',
+                          hintText: "Enter the Title",
+                          border: const OutlineInputBorder(),
                         ),
                         const SizedBox(height: 12),
                         // Subtitle
-                        TextField(
-                          autocorrect: false,
+                        PrimaryTextField(
                           controller: _subtitleCtl,
                           focusNode: _subtitleFocus,
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => _handleCreate(),
-                          decoration: const InputDecoration(
-                            labelText: 'Subtitle',
-                            border: OutlineInputBorder(),
-                          ),
+                          labelText: 'Subtitle',
+                          hintText: "Enter the SubTitle",
+                          border: const OutlineInputBorder(),
                         ),
                         const SizedBox(height: 400),
                       ],
@@ -259,8 +285,8 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
               AnimatedPositioned(
                 duration: _kAnim,
                 curve: Curves.easeOutCubic,
-                left: 20,
-                right: 20,
+                left: Paddings.screentHorizontal,
+                right: Paddings.screentHorizontal,
                 bottom: buttonBottom,
                 child: Hero(
                   tag: 'hero-cta',
@@ -270,8 +296,12 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
                     width: double.infinity,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
+                        backgroundColor: isDarkMode
+                            ? Colors.white
+                            : Colors.black,
+                        foregroundColor: isDarkMode
+                            ? Colors.black
+                            : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -313,6 +343,7 @@ class _TooltipBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     // 오버레이 안에서도 자체 탭은 바깥으로 전파되지 않도록 처리
     return Material(
       color: Colors.transparent,
@@ -320,9 +351,13 @@ class _TooltipBubble extends StatelessWidget {
         onTap: () {}, // 내부 탭 흡수
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: const Color(0xEE222222),
+            color: isDarkMode ? Colors.black : Colors.white,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.white24),
+            border: Border.all(
+              color: isDarkMode
+                  ? Borders.lineColorDark
+                  : Borders.lineColorLight,
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -333,7 +368,10 @@ class _TooltipBubble extends StatelessWidget {
                 Expanded(
                   child: Text(
                     text,
-                    style: const TextStyle(color: Colors.white, height: 1.25),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      height: 1.25,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -341,10 +379,10 @@ class _TooltipBubble extends StatelessWidget {
                 InkResponse(
                   onTap: onClose,
                   radius: 16,
-                  child: const Icon(
+                  child: Icon(
                     Icons.close,
                     size: 18,
-                    color: Colors.white70,
+                    color: isDarkMode ? Colors.white70 : Colors.black87,
                   ),
                 ),
               ],

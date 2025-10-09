@@ -1,3 +1,4 @@
+import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 
 /// AppBar 바로 아래에서 아래 방향으로 매우 부드럽게 사라지는 그라데이션.
@@ -19,9 +20,8 @@ class AppbarGradation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color base = useThemeBg
-        ? Theme.of(context).scaffoldBackgroundColor
-        : Colors.black;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final Color base = isDarkMode ? Colors.black : Colors.white;
 
     // 알파를 직접 만들어 주는 헬퍼
     Color fade(double a01) => Color.fromARGB(

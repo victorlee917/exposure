@@ -29,4 +29,6 @@ class Sizes {
   static const size80 = 80.0;
   static const size96 = 96.0;
   static const sizeButtonHeight = 52.0;
+  static const sizeTextFieldHeight = 52.0;
+  static const sizeTextFieldFont = 14.0;
 }

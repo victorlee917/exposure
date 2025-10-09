@@ -3,6 +3,7 @@ import 'package:daily_exposures/constants/paddings.dart';
 import 'package:daily_exposures/constants/rvalues.dart';
 import 'package:daily_exposures/constants/sizes.dart';
 import 'package:daily_exposures/constants/gaps.dart';
+import 'package:daily_exposures/features/common/widgets/primary_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -47,8 +48,14 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text("Change Nickname")),
+      appBar: AppBar(
+        title: const Text("Nickname"),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+      ),
       resizeToAvoidBottomInset: true,
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -59,40 +66,16 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
           child: Column(
             children: [
               Gaps.v24,
-              TextField(
+              PrimaryTextField(
                 controller: _usernameController,
                 focusNode: _focusNode,
-                textAlign: TextAlign.center,
                 keyboardType: TextInputType.visiblePassword,
                 textInputAction: TextInputAction.done,
-                autocorrect: false,
-                enableSuggestions: false,
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9_]')),
                   LengthLimitingTextInputFormatter(14),
                 ],
-                style: TextStyle(
-                  fontSize: Sizes.size16,
-                  fontWeight: Fonts.weightBold,
-                ),
-                decoration: InputDecoration(
-                  hintText: "Enter your nickname",
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade400),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).primaryColor,
-                      width: 2,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: Paddings.buttonHorizontal,
-                    vertical: Paddings.buttonVertical,
-                  ),
-                ),
+                hintText: "Enter your nickname",
               ),
             ],
           ),
@@ -121,9 +104,11 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _isUsernameValid
-                  ? Theme.of(context).primaryColor
+                  ? isDarkMode
+                        ? Colors.white
+                        : Colors.black
                   : Colors.grey.shade300,
-              foregroundColor: Colors.white,
+              foregroundColor: isDarkMode ? Colors.black : Colors.white,
               padding: const EdgeInsets.symmetric(
                 vertical: Paddings.buttonVertical,
               ),
