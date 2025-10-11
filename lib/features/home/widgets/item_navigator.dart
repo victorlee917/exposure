@@ -1,4 +1,7 @@
 import 'dart:math' as math;
+import 'package:daily_exposures/constants/borders.dart';
+import 'package:daily_exposures/constants/rolls.dart';
+import 'package:daily_exposures/constants/rvalues.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -123,6 +126,7 @@ class _ItemNavigatorState extends State<ItemNavigator>
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final controller = widget.verticalPageController;
 
     double effectiveCurrentPage() {
@@ -224,10 +228,17 @@ class _ItemNavigatorState extends State<ItemNavigator>
           width: 30,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(6.0),
+            color: isDarkMode
+                ? Rolls.backgroundColorDark
+                : Rolls.backgroundColorLight,
+            borderRadius: BorderRadius.circular(Rvalues.roll),
             border: _isPressed
-                ? Border.all(color: Colors.white, width: 1.0)
+                ? Border.all(
+                    color: isDarkMode
+                        ? Borders.lineColorDark
+                        : Borders.lineColorLight,
+                    width: 1.0,
+                  )
                 : null,
           ),
           child: Center(
@@ -261,7 +272,9 @@ class _ItemNavigatorState extends State<ItemNavigator>
                             width: size,
                             height: size,
                             decoration: BoxDecoration(
-                              color: Colors.white.withAlpha(128),
+                              color: isDarkMode
+                                  ? Colors.white.withAlpha(128)
+                                  : Colors.black.withAlpha(128),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -277,8 +290,8 @@ class _ItemNavigatorState extends State<ItemNavigator>
                     child: Container(
                       width: 8.0,
                       height: 8.0,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.white : Colors.black,
                         shape: BoxShape.circle,
                       ),
                     ),

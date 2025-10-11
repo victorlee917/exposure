@@ -1,5 +1,7 @@
 // lib/features/capture/capture_picture_screen.dart
 import 'dart:async';
+import 'package:daily_exposures/constants/fonts.dart';
+import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -213,6 +215,7 @@ class _CapturePictureScreenState extends State<CapturePictureScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final mq = MediaQuery.of(context);
     final double screenW = mq.size.width;
     final double screenH = mq.size.height;
@@ -229,10 +232,7 @@ class _CapturePictureScreenState extends State<CapturePictureScreen>
         tag: 'appbar-hero',
         // flight에서 AppBar 안의 텍스트 재레이아웃 방지를 위해 Material 감싸기
         child: Material(
-          color: Colors.black,
           child: AppBar(
-            elevation: 0,
-            backgroundColor: Colors.black,
             leading: IconButton(
               icon: const Icon(Icons.close),
               onPressed: () => Navigator.of(context).maybePop(),
@@ -242,7 +242,12 @@ class _CapturePictureScreenState extends State<CapturePictureScreen>
             actions: [
               TextButton(
                 onPressed: _selected == null ? null : _goToCaption,
-                child: const Text('Next'),
+                child: Text(
+                  'Next',
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
               ),
             ],
           ),
@@ -251,7 +256,6 @@ class _CapturePictureScreenState extends State<CapturePictureScreen>
     );
 
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: heroAppBar,
       body: Stack(
         children: [
@@ -303,7 +307,7 @@ class _CapturePictureScreenState extends State<CapturePictureScreen>
                           width: 48,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: Colors.white24,
+                            color: isDarkMode ? Colors.white24 : Colors.black26,
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),
@@ -321,12 +325,20 @@ class _CapturePictureScreenState extends State<CapturePictureScreen>
           ),
 
           if (_loading)
-            const Center(child: CircularProgressIndicator(color: Colors.white)),
+            Center(
+              child: CircularProgressIndicator(
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
+            ),
           if (!_loading && _error != null)
             Center(
               child: Text(
                 _error!,
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(
+                  color: isDarkMode
+                      ? Fonts.colorSubTextDark
+                      : Fonts.colorSubTextLight,
+                ),
               ),
             ),
         ],
@@ -420,8 +432,9 @@ class _PickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: Colors.black,
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Column(
         children: [
           topBand,
@@ -440,10 +453,14 @@ class _PickerSheet extends StatelessWidget {
                   return false; // 그리드 기본 스크롤 유지
                 },
                 child: assets.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
                           'No photos',
-                          style: TextStyle(color: Colors.white70),
+                          style: TextStyle(
+                            color: isDarkMode
+                                ? Fonts.colorSubTextDark
+                                : Fonts.colorSubTextLight,
+                          ),
                         ),
                       )
                     : GridView.builder(
@@ -476,7 +493,9 @@ class _PickerSheet extends StatelessWidget {
                                   Container(
                                     decoration: BoxDecoration(
                                       border: Border.all(
-                                        color: const Color(0xFFB388FF),
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : Colors.black,
                                         width: 3,
                                       ),
                                     ),

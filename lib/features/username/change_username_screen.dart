@@ -49,6 +49,7 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final double bottomSafeArea = MediaQuery.of(context).padding.bottom;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Nickname"),
@@ -62,10 +63,10 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: Paddings.screentHorizontal,
+            vertical: Paddings.screentVertical,
           ),
           child: Column(
             children: [
-              Gaps.v24,
               PrimaryTextField(
                 controller: _usernameController,
                 focusNode: _focusNode,
@@ -84,8 +85,9 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
       bottomNavigationBar: Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom > 0
-              ? MediaQuery.of(context).viewInsets.bottom + 24
-              : Paddings.screentVertical,
+              ? MediaQuery.of(context).viewInsets.bottom +
+                    Paddings.screentHorizontal
+              : bottomSafeArea,
           left: Paddings.screentHorizontal,
           right: Paddings.screentHorizontal,
           top: Paddings.screentVertical,
@@ -119,8 +121,8 @@ class _ChangeUsernameScreenState extends State<ChangeUsernameScreen> {
             child: Text(
               "Save",
               style: TextStyle(
-                fontSize: Sizes.size16,
-                fontWeight: Fonts.weightBold,
+                fontSize: Sizes.sizeButtonFont,
+                fontWeight: Fonts.weightExtraHeavy,
               ),
             ),
           ),

@@ -8,9 +8,15 @@ class TextChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Text(
       text,
-      style: const TextStyle(fontWeight: Fonts.weightBold, color: Colors.white, fontSize: 11, letterSpacing: 0.5),
+      style: TextStyle(
+        fontWeight: Fonts.weightBold,
+        color: isDarkMode ? Colors.white : Colors.black,
+        fontSize: 11,
+        letterSpacing: 0.5,
+      ),
     );
   }
 }

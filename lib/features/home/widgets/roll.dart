@@ -1,3 +1,4 @@
+import 'package:daily_exposures/constants/rvalues.dart';
 import 'package:flutter/material.dart';
 
 class Roll extends StatelessWidget {
@@ -7,17 +8,20 @@ class Roll extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(6.0),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0x1A000000), // Colors.black.withOpacity(0.1)
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: isDarkMode ? Colors.black : Colors.white,
+        borderRadius: BorderRadius.circular(Rvalues.roll),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: isDarkMode
+        //         ? Colors.white38
+        //         : Colors.black38, // Colors.black.withOpacity(0.1)
+        //     blurRadius: 8,
+        //     offset: const Offset(0, 4),
+        //   ),
+        // ],
       ),
       child: Center(
         child: Text(

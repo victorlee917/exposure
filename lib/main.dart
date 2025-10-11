@@ -23,6 +23,7 @@ class DailyExposures extends StatelessWidget {
           themeMode: value ? ThemeMode.dark : ThemeMode.light,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            scaffoldBackgroundColor: Colors.white,
             appBarTheme: const AppBarTheme(
               foregroundColor: Colors.black,
               backgroundColor: Colors.white,
@@ -31,7 +32,7 @@ class DailyExposures extends StatelessWidget {
               titleTextStyle: TextStyle(
                 color: Colors.black,
                 fontSize: Sizes.size16,
-                fontWeight: Fonts.weightBold,
+                fontWeight: Fonts.weightHeavy,
               ),
             ),
           ),
@@ -46,7 +47,7 @@ class DailyExposures extends StatelessWidget {
               titleTextStyle: TextStyle(
                 color: Colors.white,
                 fontSize: Sizes.size16,
-                fontWeight: Fonts.weightBold,
+                fontWeight: Fonts.weightHeavy,
               ),
             ),
           ),

@@ -1,9 +1,13 @@
 import 'package:daily_exposures/constants/borders.dart';
+import 'package:daily_exposures/constants/fonts.dart';
+import 'package:daily_exposures/constants/rolls.dart';
+import 'package:daily_exposures/constants/rvalues.dart';
 import 'package:daily_exposures/constants/sizes.dart';
 import 'package:daily_exposures/features/common/widgets/text_chip.dart';
 import 'package:daily_exposures/features/common/widgets/text_roll_description.dart';
 import 'package:daily_exposures/features/common/widgets/text_roll_title.dart';
 import 'package:daily_exposures/features/home/widgets/roll.dart';
+import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -35,13 +39,14 @@ class FilmRollView extends StatelessWidget {
   final Widget? shareIcon;
   final int? draftPage;
 
-  static const double _kCardRadius = 8.0; // 카드와 동일
+  static const double _kCardRadius = Rvalues.roll; // 카드와 동일
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final double diff = (rollIndex - currentPage);
     final double scale = (1 - diff.abs() * 0.4).clamp(0.8, 1.0);
-    final double opacity = (1 - diff.abs() * 8).clamp(0.3, 1.0);
+    final double opacity = (1 - diff.abs() * 8).clamp(0.8, 1.0);
 
     // 진행률
     final int total = itemCount <= 0 ? 1 : itemCount;
@@ -50,7 +55,11 @@ class FilmRollView extends StatelessWidget {
 
     // ✅ 게이지 색 결정
     final bool filledAndUndeveloped = !isDeveloped && (dp >= total);
-    final Color gaugeColor = filledAndUndeveloped ? Colors.green : Colors.white;
+    final Color gaugeColor = filledAndUndeveloped
+        ? const Color.fromARGB(255, 97, 255, 102)
+        : isDarkMode
+        ? Colors.white
+        : Colors.black;
 
     // 상태 뱃지
     final Widget statusRow = isDeveloped
@@ -61,21 +70,21 @@ class FilmRollView extends StatelessWidget {
                 radius: _kCardRadius,
                 child: TextChip(text: 'DEVELOPED'),
               ),
-              const SizedBox(width: 8),
-              _BadgeChip(
-                radius: _kCardRadius,
-                onTap: () {
-                  // 공유 동작 (필요 시 교체)
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 2.0),
-                  child: Icon(
-                    FontAwesomeIcons.shareNodes,
-                    size: 12,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              // const SizedBox(width: 8),
+              // _BadgeChip(
+              //   radius: _kCardRadius,
+              //   onTap: () {
+              //     // 공유 동작 (필요 시 교체)
+              //   },
+              //   child: Padding(
+              //     padding: EdgeInsets.symmetric(horizontal: 2.0),
+              //     child: Icon(
+              //       FontAwesomeIcons.shareNodes,
+              //       size: 12,
+              //       color: isDarkMode ? Colors.white : Colors.black,
+              //     ),
+              //   ),
+              // ),
             ],
           )
         : _ExpGaugeChip(
@@ -152,12 +161,22 @@ class FilmRollView extends StatelessWidget {
                           children: [
                             Text(
                               'Started: ${filmRollDetails["started"]}',
-                              style: Theme.of(context).textTheme.bodyMedium,
+                              style: TextStyle(
+                                fontSize: Sizes.size14,
+                                color: isDarkMode
+                                    ? Fonts.colorSubTextDark
+                                    : Fonts.colorSubTextLight,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Ended: ${filmRollDetails["ended"]}',
-                              style: Theme.of(context).textTheme.bodyMedium,
+                              style: TextStyle(
+                                fontSize: Sizes.size14,
+                                color: isDarkMode
+                                    ? Fonts.colorSubTextDark
+                                    : Fonts.colorSubTextLight,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -165,7 +184,12 @@ class FilmRollView extends StatelessWidget {
                               children: [
                                 Text(
                                   'Developed: ${filmRollDetails["developed"]}',
-                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  style: TextStyle(
+                                    fontSize: Sizes.size14,
+                                    color: isDarkMode
+                                        ? Fonts.colorSubTextDark
+                                        : Fonts.colorSubTextLight,
+                                  ),
                                 ),
                               ],
                             ),
@@ -196,7 +220,9 @@ class FilmRollView extends StatelessWidget {
                       }
                       return Container(
                         decoration: BoxDecoration(
-                          color: const Color.fromRGBO(36, 36, 36, 1.0),
+                          color: isDarkMode
+                              ? Rolls.backgroundColorDark
+                              : Rolls.backgroundColorLight,
                           borderRadius: borderRadius,
                         ),
                         padding: itemEdgeInsets(itemIndex, itemCount),
@@ -224,11 +250,13 @@ class _BadgeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final core = Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xE6000000),
+        color: isDarkMode
+            ? Rolls.backgroundColorDark
+            : Rolls.backgroundColorLight,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
           color: isDarkMode ? Borders.lineColorDark : Borders.lineColorLight,
@@ -260,6 +288,7 @@ class _ExpGaugeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     const double barW = 64;
     const double barH = 6;
     final double clamped = progress.clamp(0.0, 1.0);
@@ -275,11 +304,16 @@ class _ExpGaugeChip extends StatelessWidget {
             width: barW,
             height: barH,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(barH / 2),
+              // borderRadius: BorderRadius.circular(barH / 2),
+              borderRadius: BorderRadius.circular(Rvalues.roll),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Container(color: Colors.white.withOpacity(0.24)),
+                  Container(
+                    color: isDarkMode
+                        ? Colors.white.withOpacity(0.24)
+                        : Colors.black.withOpacity(0.24),
+                  ),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: AnimatedContainer(
@@ -288,7 +322,8 @@ class _ExpGaugeChip extends StatelessWidget {
                       width: barW * clamped,
                       decoration: BoxDecoration(
                         color: gaugeColor, // ✅ 동적 색상
-                        borderRadius: BorderRadius.circular(barH / 2),
+                        // borderRadius: BorderRadius.circular(barH / 2),
+                        borderRadius: BorderRadius.circular(Rvalues.roll),
                       ),
                     ),
                   ),

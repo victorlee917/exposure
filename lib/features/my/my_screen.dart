@@ -5,12 +5,12 @@ import 'package:daily_exposures/constants/rvalues.dart';
 import 'package:daily_exposures/constants/sizes.dart';
 import 'package:daily_exposures/features/common/widgets/appbar_gradation.dart';
 import 'package:daily_exposures/features/my/widgets/list_label.dart';
-import 'package:daily_exposures/features/username/change_username_screen.dart';
+// import 'package:daily_exposures/features/username/change_username_screen.dart';
 import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:in_app_review/in_app_review.dart';
-import 'package:share_plus/share_plus.dart';
+// import 'package:share_plus/share_plus.dart';
 
 class MyScreen extends StatefulWidget {
   const MyScreen({super.key});
@@ -62,30 +62,22 @@ class _MyScreenState extends State<MyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isSystemDarkMode =
-        Theme.of(context).brightness == Brightness.dark;
     return Theme(
       data: Theme.of(context).copyWith(
         highlightColor: Colors.transparent,
         splashColor: Colors.transparent,
       ),
       child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(kToolbarHeight),
           child: AppBar(
             leading: IconButton(
-              icon: FaIcon(
-                FontAwesomeIcons.chevronLeft,
-                color: Theme.of(context).appBarTheme.iconTheme?.color,
-              ),
+              icon: FaIcon(FontAwesomeIcons.chevronLeft),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             centerTitle: true,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            surfaceTintColor: Colors.transparent,
             elevation: 0,
           ),
         ),
@@ -94,48 +86,48 @@ class _MyScreenState extends State<MyScreen> {
             // 본문
             ListView(
               padding: const EdgeInsets.only(
-                top: 60,
+                top: 0,
                 bottom: Paddings.buttonVertical,
                 left: Paddings.screentHorizontal,
                 right: Paddings.screentHorizontal,
               ),
               children: [
-                const Text(
-                  "Hello,\nnickname",
-                  style: TextStyle(fontSize: 28, fontWeight: Fonts.weightHeavy),
-                ),
-                const SizedBox(height: 20),
-                ListTile(
-                  minTileHeight: Sizes.sizeButtonHeight,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: Paddings.buttonHorizontal,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(Rvalues.button),
-                    side: BorderSide(
-                      color: isSystemDarkMode
-                          ? Borders.lineColorDark
-                          : Borders.lineColorLight,
-                    ),
-                  ),
-                  title: const Text("exposure.link/nickname"),
-                  trailing: const FaIcon(FontAwesomeIcons.share, size: 16),
-                  onTap: () {
-                    Share.share("exposure.link/nickname");
-                  },
-                ),
-                const SizedBox(height: 20),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: const ListLabel(text: "Change nickname"),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const ChangeUsernameScreen(),
-                      ),
-                    );
-                  },
-                ),
+                // const Text(
+                //   "Hello,\nnickname",
+                //   style: TextStyle(fontSize: 28, fontWeight: Fonts.weightHeavy),
+                // ),
+                // const SizedBox(height: 20),
+                // ListTile(
+                //   minTileHeight: Sizes.sizeButtonHeight,
+                //   contentPadding: const EdgeInsets.symmetric(
+                //     horizontal: Paddings.buttonHorizontal,
+                //   ),
+                //   shape: RoundedRectangleBorder(
+                //     borderRadius: BorderRadius.circular(Rvalues.button),
+                //     side: BorderSide(
+                //       color: isSystemDarkMode
+                //           ? Borders.lineColorDark
+                //           : Borders.lineColorLight,
+                //     ),
+                //   ),
+                //   title: const Text("exposure.link/nickname"),
+                //   trailing: const FaIcon(FontAwesomeIcons.share, size: 16),
+                //   onTap: () {
+                //     Share.share("exposure.link/nickname");
+                //   },
+                // ),
+                // const SizedBox(height: 20),
+                // ListTile(
+                //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                //   title: const ListLabel(text: "Change nickname"),
+                //   onTap: () {
+                //     Navigator.of(context).push(
+                //       MaterialPageRoute(
+                //         builder: (context) => const ChangeUsernameScreen(),
+                //       ),
+                //     );
+                //   },
+                // ),
                 ValueListenableBuilder(
                   valueListenable: isDarkMode,
                   builder: (context, value, child) {
@@ -177,34 +169,34 @@ class _MyScreenState extends State<MyScreen> {
                   title: ListLabel(text: "Exposure Instagram"),
                   onTap: () {},
                 ),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: ListLabel(text: "Privacy Policy"),
-                  onTap: () {},
-                ),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: ListLabel(text: "Terms of Service"),
-                  onTap: () {},
-                ),
-                Divider(
-                  color: isSystemDarkMode
-                      ? Borders.lineColorDark
-                      : Borders.lineColorLight,
-                ),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: ListLabel(text: "Logout"),
-                  onTap: () {},
-                ),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: ListLabel(
-                    text: "Delete Account",
-                    textColor: Colors.red,
-                  ),
-                  onTap: () {},
-                ),
+                // ListTile(
+                //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                //   title: ListLabel(text: "Privacy Policy"),
+                //   onTap: () {},
+                // ),
+                // ListTile(
+                //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                //   title: ListLabel(text: "Terms of Service"),
+                //   onTap: () {},
+                // ),
+                // Divider(
+                //   color: isSystemDarkMode
+                //       ? Borders.lineColorDark
+                //       : Borders.lineColorLight,
+                // ),
+                // ListTile(
+                //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                //   title: ListLabel(text: "Logout"),
+                //   onTap: () {},
+                // ),
+                // ListTile(
+                //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                //   title: ListLabel(
+                //     text: "Delete Account",
+                //     textColor: Colors.red,
+                //   ),
+                //   onTap: () {},
+                // ),
               ],
             ),
 

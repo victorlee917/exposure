@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 import 'package:daily_exposures/constants/borders.dart';
+import 'package:daily_exposures/constants/fonts.dart';
 import 'package:daily_exposures/constants/paddings.dart';
 import 'package:daily_exposures/constants/rvalues.dart';
+import 'package:daily_exposures/constants/sizes.dart';
 import 'package:daily_exposures/features/common/widgets/primary_text_field.dart';
 import 'package:flutter/material.dart';
 
@@ -36,7 +38,7 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
 
   // 간격
   static const double _kGapNoKeyboard = 32.0; // 키보드 없을 때
-  static const double _kGapKeyboard = 16.0; // 키보드 있을 때
+  static const double _kGapKeyboard = Paddings.screentHorizontal; // 키보드 있을 때
   static const Duration _kAnim = Duration(milliseconds: 140);
 
   @override
@@ -292,7 +294,7 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
                   tag: 'hero-cta',
                   flightShuttleBuilder: _materialShuttle,
                   child: SizedBox(
-                    height: 52,
+                    height: Sizes.sizeButtonHeight,
                     width: double.infinity,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
@@ -303,13 +305,16 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
                             ? Colors.black
                             : Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(Rvalues.button),
                         ),
                       ),
                       onPressed: _handleCreate,
                       child: Text(
                         widget.ctaLabel,
-                        style: const TextStyle(fontWeight: FontWeight.w800),
+                        style: const TextStyle(
+                          fontSize: Sizes.sizeButtonFont,
+                          fontWeight: Fonts.weightExtraHeavy,
+                        ),
                       ),
                     ),
                   ),

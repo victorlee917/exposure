@@ -1,3 +1,5 @@
+import 'package:daily_exposures/constants/borders.dart';
+import 'package:daily_exposures/constants/rvalues.dart';
 import 'package:daily_exposures/features/capture/capture_movie_screen.dart'
     show HeroSnapshotStore;
 import 'package:flutter/material.dart';
@@ -38,10 +40,10 @@ class MediaResultCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: isDarkMode ? const Color(0xFF111111) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Rvalues.button),
           border: Border.all(
-            color: isDarkMode ? Colors.white10 : Colors.black12,
-            width: 2,
+            color: isDarkMode ? Borders.lineColorDark : Borders.lineColorLight,
+            width: 1,
           ),
         ),
         padding: const EdgeInsets.all(10),
@@ -49,7 +51,7 @@ class MediaResultCard extends StatelessWidget {
           children: [
             // Image/Poster Area
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(Rvalues.button),
               child: SizedBox(
                 width: isMovie ? 60 : 64,
                 height: isMovie ? 90 : 64,

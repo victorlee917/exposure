@@ -100,6 +100,7 @@ class _PrimaryTextFieldState extends State<PrimaryTextField> {
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       cursorColor: isDarkMode ? Colors.white : Colors.black,
+      cursorHeight: Sizes.sizeTextFieldFont,
       style: TextStyle(
         fontSize: Sizes.sizeTextFieldFont,
         fontWeight: Fonts.weightBold,
@@ -110,7 +111,7 @@ class _PrimaryTextFieldState extends State<PrimaryTextField> {
         hintText: widget.hintText,
         hintStyle: TextStyle(
           fontSize: Sizes.sizeTextFieldFont,
-          color: isDarkMode ? Colors.white38 : Colors.black45,
+          color: isDarkMode ? Fonts.colorHintDark : Fonts.colorHintLight,
         ),
         labelText: widget.labelText,
         labelStyle: TextStyle(

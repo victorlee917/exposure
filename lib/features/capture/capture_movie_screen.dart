@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:daily_exposures/constants/paddings.dart';
 import 'package:daily_exposures/features/common/widgets/appbar_gradation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
@@ -9,6 +10,7 @@ import 'caption_screen.dart';
 import 'capture_origin.dart'; // MovieOrigin 사용
 import 'package:daily_exposures/features/capture/widgets/media_result_card.dart';
 import 'package:daily_exposures/features/capture/widgets/utils.dart';
+import 'package:daily_exposures/features/capture/widgets/search_text_field.dart';
 
 /// ⬇️ Hero 비행 동안 사용할 스냅샷 저장소 (간단 공유 메모리)
 class HeroSnapshotStore {
@@ -124,13 +126,9 @@ class _CaptureMovieScreenState extends State<CaptureMovieScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: isDarkMode ? Colors.black : Colors.white,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.close),
@@ -141,147 +139,95 @@ class _CaptureMovieScreenState extends State<CaptureMovieScreen> {
         // ✅ Next 버튼 제거
         actions: const [],
       ),
-      body: Column(
-        children: [
-          // 검색 폼
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: TextField(
-              autocorrect: false,
+      body: Padding(
+        padding: EdgeInsetsGeometry.symmetric(
+          horizontal: Paddings.screentHorizontal,
+        ),
+        child: Column(
+          children: [
+            // 검색 폼
+            SearchTextField(
               controller: _controller,
               focusNode: _focusNode,
-              autofocus: true,
-              textInputAction: TextInputAction.search,
+              hintText: 'Search movies or TV series by name',
               onSubmitted: _onSubmitted,
-              decoration: InputDecoration(
-                hintText: 'Search movies or TV series by name',
-                hintStyle: const TextStyle(
-                  color: ui.Color.fromARGB(97, 177, 83, 83),
-                ),
-                filled: true,
-                fillColor: isDarkMode ? const Color(0xFF171717) : Colors.white,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: isDarkMode ? Colors.white12 : Colors.black12,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: isDarkMode ? Colors.white12 : Colors.black12,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: isDarkMode ? Colors.white54 : Colors.black54,
-                  ),
-                ),
-                suffixIcon: _controller.text.isNotEmpty
-                    ? IconButton(
-                        tooltip: 'Clear',
-                        icon: Icon(
-                          Icons.clear,
-                          color: isDarkMode ? Colors.white54 : Colors.black54,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _controller.clear();
-                            _results = [];
-                            _lastQuery = "";
-                          });
-                          _focusNode.requestFocus();
-                        },
-                      )
-                    : IconButton(
-                        tooltip: 'Search',
-                        icon: const Icon(Icons.search),
-                        onPressed: () {
-                          _focusNode.unfocus();
-                          _onSubmitted(_controller.text);
-                        },
-                      ),
-              ),
-              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
-              cursorColor: isDarkMode ? Colors.white70 : Colors.black54,
+              onClear: () {
+                setState(() {
+                  _controller.clear();
+                  _results = [];
+                  _lastQuery = "";
+                });
+                _focusNode.requestFocus();
+              },
               onChanged: (_) => setState(() {}),
             ),
-          ),
 
-          // 결과 영역
-          Expanded(
-            child: Stack(
-              children: [
-                // 스크롤 콘텐츠
-                Positioned.fill(
-                  child: _loading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.white70,
-                          ),
-                        )
-                      : _results.isEmpty
-                      ? _EmptyState(lastQuery: _lastQuery)
-                      : CustomScrollView(
-                          physics: const BouncingScrollPhysics(),
-                          slivers: [
-                            // 리스트 시작 전 상단 간격
-                            const SliverToBoxAdapter(
-                              child: SizedBox(height: 16),
+            // 결과 영역
+            Expanded(
+              child: Stack(
+                children: [
+                  // 스크롤 콘텐츠
+                  Positioned.fill(
+                    child: _loading
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white70,
                             ),
-
-                            SliverPadding(
-                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 36),
-                              sliver: SliverList.separated(
-                                itemCount: _results.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(height: 10),
-                                itemBuilder: (context, index) {
-                                  final item = _results[index];
-                                  final heroTag = 'movie-card-${item.id}';
-                                  final key = _tileBoundaryKeys.putIfAbsent(
-                                    heroTag,
-                                    () => GlobalKey(),
-                                  );
-                                  return MediaResultCard(
-                                    boundaryKey: key,
-                                    heroTag: heroTag,
-                                    title: item.title,
-                                    typeLabel: item.isTvSeries
-                                        ? 'TV series'
-                                        : 'Movie',
-                                    yearLabel: extractYear(item.releaseDate),
-                                    imageUrl: item.posterUrl,
-                                    isMovie: true,
-                                    onTap: () => _goToCaption(item),
-                                  );
-                                },
+                          )
+                        : _results.isEmpty
+                        ? _EmptyState(lastQuery: _lastQuery)
+                        : CustomScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            slivers: [
+                              // 리스트 시작 전 상단 간격
+                              const SliverToBoxAdapter(
+                                child: SizedBox(height: 16),
                               ),
-                            ),
-                          ],
-                        ),
-                ),
 
-                // 검색 폼 바로 아래 깔리는 고정 그라데이션
-                const Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: AppbarGradation(
-                    height: 20,
-                    useThemeBg: false,
-                    intensity: 0.9,
+                              SliverPadding(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 36),
+                                sliver: SliverList.separated(
+                                  itemCount: _results.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: 10),
+                                  itemBuilder: (context, index) {
+                                    final item = _results[index];
+                                    final heroTag = 'movie-card-${item.id}';
+                                    final key = _tileBoundaryKeys.putIfAbsent(
+                                      heroTag,
+                                      () => GlobalKey(),
+                                    );
+                                    return MediaResultCard(
+                                      boundaryKey: key,
+                                      heroTag: heroTag,
+                                      title: item.title,
+                                      typeLabel: item.isTvSeries
+                                          ? 'TV series'
+                                          : 'Movie',
+                                      yearLabel: extractYear(item.releaseDate),
+                                      imageUrl: item.posterUrl,
+                                      isMovie: true,
+                                      onTap: () => _goToCaption(item),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
-                ),
-              ],
+
+                  // 검색 폼 바로 아래 깔리는 고정 그라데이션
+                  const Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: AppbarGradation(height: 20, useThemeBg: true),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

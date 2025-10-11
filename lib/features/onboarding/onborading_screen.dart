@@ -1,7 +1,7 @@
 import 'package:daily_exposures/constants/gaps.dart';
 import 'package:daily_exposures/constants/paddings.dart';
 import 'package:daily_exposures/constants/sizes.dart';
-import 'package:daily_exposures/features/authentication/login_screen.dart';
+import 'package:daily_exposures/features/home/home_screen.dart';
 import 'package:daily_exposures/features/onboarding/widgets/pagination_button.dart';
 import 'package:daily_exposures/features/onboarding/widgets/pagination_title_block.dart';
 import 'package:daily_exposures/features/onboarding/widgets/pagination_slot.dart';
@@ -54,7 +54,7 @@ class _OnboradingScreenState extends State<OnboradingScreen> {
     final last = _current == _pages.length - 1;
     if (last) {
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        MaterialPageRoute(builder: (context) => const Home()),
         (route) => false,
       );
     } else {

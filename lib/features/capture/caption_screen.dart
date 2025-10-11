@@ -1,4 +1,6 @@
 import 'dart:math' as math;
+import 'package:daily_exposures/constants/borders.dart';
+import 'package:daily_exposures/constants/paddings.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
@@ -43,16 +45,12 @@ class _CaptionScreenState extends State<CaptionScreen> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: Hero(
           tag: 'appbar-hero',
           child: AppBar(
-            elevation: 0,
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            surfaceTintColor: Colors.transparent,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () => Navigator.of(context).maybePop(),
@@ -62,14 +60,21 @@ class _CaptionScreenState extends State<CaptionScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).maybePop(),
-                child: const Text('Done'),
+                child: Text(
+                  'Done',
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
               ),
             ],
           ),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(
+          horizontal: Paddings.screentHorizontal,
+        ),
         child: Column(
           children: [
             const SizedBox(height: 16),
@@ -83,7 +88,12 @@ class _CaptionScreenState extends State<CaptionScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            const Divider(height: 1, color: Colors.white12),
+            // Divider(
+            //   height: 1,
+            //   color: isDarkMode
+            //       ? Borders.lineColorDark
+            //       : Borders.lineColorLight,
+            // ),
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {

@@ -31,4 +31,5 @@ class Sizes {
   static const sizeButtonHeight = 52.0;
   static const sizeTextFieldHeight = 52.0;
   static const sizeTextFieldFont = 14.0;
+  static const sizeButtonFont = 14.0;
 }

@@ -170,9 +170,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       started: "2023-02-01",
       ended: "In progress",
       developedAt: "Not yet",
-      type: "music",
+      type: "picture_vertical",
       isDeveloped: false,
-      draftPage: 7,
+      draftPage: 12,
     ),
     FilmRollDetail(
       started: "2023-03-01",
@@ -427,7 +427,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(kToolbarHeight),
             child: AppBar(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               surfaceTintColor: Colors.transparent,
               elevation: 0,
               leading: IconButton(
@@ -449,7 +448,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               actions: [
                 IconButton(
                   icon: FaIcon(
-                    FontAwesomeIcons.usersLine,
+                    FontAwesomeIcons.bars,
                     color: Theme.of(context).appBarTheme.iconTheme?.color,
                   ),
                   onPressed: () {

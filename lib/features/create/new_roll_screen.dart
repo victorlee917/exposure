@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:daily_exposures/constants/fonts.dart';
 import 'package:daily_exposures/constants/paddings.dart';
 import 'package:daily_exposures/constants/rvalues.dart';
 import 'package:daily_exposures/constants/sizes.dart';
@@ -538,7 +539,10 @@ class _NewRollScreenState extends State<NewRollScreen> {
                   },
                   child: Text(
                     ctaLabel,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
+                    style: const TextStyle(
+                      fontWeight: Fonts.weightExtraHeavy,
+                      fontSize: Sizes.sizeButtonFont,
+                    ),
                   ),
                 ),
               ),
