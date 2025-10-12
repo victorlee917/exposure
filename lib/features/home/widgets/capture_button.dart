@@ -19,6 +19,7 @@ class CaptureButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
+      top: false,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onPressed,

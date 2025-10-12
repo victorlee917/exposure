@@ -60,7 +60,6 @@ class _NewRollScreenState extends State<NewRollScreen> {
   ];
 
   final List<bool> _isPurchased = [true, false, true, false];
-  final Map<int, int> _expSelection = {};
 
   // 하단 그라데이션 반지름 측정용
   final GlobalKey _markerKey = GlobalKey();
@@ -83,7 +82,6 @@ class _NewRollScreenState extends State<NewRollScreen> {
 
     for (var i = 0; i < _pageCount; i++) {
       _verticalCtrls[i] = ScrollController(initialScrollOffset: 0.0);
-      _expSelection[i] = 24;
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -341,112 +339,16 @@ class _NewRollScreenState extends State<NewRollScreen> {
 
   // ====== 하단 오버레이 ======
   Widget _bottomOverlay(BuildContext context) {
-    const double kStateRowHeight = 36;
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
     // 테마 기반 색상 정의
-    final primaryTextColor = isDarkMode ? Colors.white : Colors.black;
-    final secondaryTextColor = isDarkMode ? Colors.white70 : Colors.black54;
-    final tertiaryTextColor = isDarkMode ? Colors.white54 : Colors.black45;
-    final dropdownBgColor = isDarkMode
-        ? Colors.white.withOpacity(0.10)
-        : Colors.black.withOpacity(0.05);
-    final dropdownBorderColor = isDarkMode ? Colors.white24 : Colors.black12;
-    final dropdownMenuColor = isDarkMode ? Colors.black87 : Colors.white;
     final ctaButtonBgColor = isDarkMode ? Colors.white : Colors.black;
     final ctaButtonFgColor = isDarkMode ? Colors.black : Colors.white;
 
     final title = _pageTitles[_activeDataIndex % _pageTitles.length];
     final desc = _pageDescriptions[_activeDataIndex % _pageDescriptions.length];
     final purchased = _isPurchased[_activeDataIndex];
-    final exp = _expSelection[_activeDataIndex] ?? 24;
-
-    Widget stateArea;
-    if (purchased) {
-      stateArea = SizedBox(
-        height: kStateRowHeight,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('EXP', style: TextStyle(color: secondaryTextColor)),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: dropdownBgColor,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: dropdownBorderColor),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: SizedBox(
-                  height: kStateRowHeight - 8,
-                  child: DropdownButton<int>(
-                    isDense: true,
-                    value: exp,
-                    dropdownColor: dropdownMenuColor,
-                    iconEnabledColor: primaryTextColor,
-                    iconSize: 18,
-                    style: TextStyle(
-                      color: primaryTextColor,
-                      fontSize: 14,
-                      height: 1.1,
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 12, child: Text('12')),
-                      DropdownMenuItem(value: 24, child: Text('24')),
-                      DropdownMenuItem(value: 36, child: Text('36')),
-                    ],
-                    onChanged: (v) {
-                      if (v == null) return;
-                      setState(() => _expSelection[_activeDataIndex] = v);
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      stateArea = SizedBox(
-        height: kStateRowHeight,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: primaryTextColor,
-                minimumSize: Size.zero,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              onPressed: () {},
-              child: const Text(
-                'Already purchased?',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text('|', style: TextStyle(color: tertiaryTextColor)),
-            const SizedBox(width: 6),
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: primaryTextColor,
-                minimumSize: Size.zero,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              onPressed: () {},
-              child: const Text(
-                'Legal',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
 
     final ctaLabel = purchased ? 'Create' : 'Purchase';
 
@@ -522,7 +424,6 @@ class _NewRollScreenState extends State<NewRollScreen> {
                         context,
                         NewRollCreateScreen(
                           rollTitle: title,
-                          exp: 24,
                           ctaLabel: 'Purchase',
                         ),
                       );
@@ -530,11 +431,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
                     }
                     _pushSeamless(
                       context,
-                      NewRollCreateScreen(
-                        rollTitle: title,
-                        exp: exp,
-                        ctaLabel: 'Create',
-                      ),
+                      NewRollCreateScreen(rollTitle: title, ctaLabel: 'Create'),
                     );
                   },
                   child: Text(

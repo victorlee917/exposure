@@ -188,6 +188,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
+    for (int i = 0; i < _filmRollDetails.length; i++) {
+      final detail = _filmRollDetails[i];
+      final initialPage = detail.isDeveloped
+          ? 0
+          : detail.draftPage >= _itemCount
+              ? 0
+              : detail.draftPage;
+      _verticalCurrentPages[i] = initialPage.toDouble();
+    }
+
     _horizontalPageController = PageController(viewportFraction: 0.65)
       ..addListener(() {
         if (_horizontalPageController.hasClients) {
@@ -265,21 +275,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       final pageHeight = cardHeight + verticalPadding;
       final viewportFraction = (pageHeight / screenHeight).clamp(0.1, 1.0);
 
-      final detail = _filmRollDetails[rollIndex];
-      final initialPage = detail.isDeveloped
-          ? 0
-          : detail.draftPage >= _itemCount
-          ? 0
-          : detail.draftPage;
-
       final controller = PageController(
         viewportFraction: viewportFraction,
-        initialPage: initialPage,
-      );
-
-      _verticalCurrentPages.putIfAbsent(
-        rollIndex,
-        () => initialPage.toDouble(),
+        initialPage: _verticalCurrentPages[rollIndex]?.round() ?? 0,
       );
 
       controller.addListener(() {

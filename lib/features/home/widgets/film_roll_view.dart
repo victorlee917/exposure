@@ -11,7 +11,7 @@ import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class FilmRollView extends StatelessWidget {
+class FilmRollView extends StatefulWidget {
   const FilmRollView({
     super.key,
     required this.rollIndex,
@@ -39,22 +39,31 @@ class FilmRollView extends StatelessWidget {
   final Widget? shareIcon;
   final int? draftPage;
 
+  @override
+  State<FilmRollView> createState() => _FilmRollViewState();
+}
+
+class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClientMixin {
   static const double _kCardRadius = Rvalues.roll; // 카드와 동일
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // Add this line
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final double diff = (rollIndex - currentPage);
+    final double diff = (widget.rollIndex - widget.currentPage);
     final double scale = (1 - diff.abs() * 0.4).clamp(0.8, 1.0);
     final double opacity = (1 - diff.abs() * 8).clamp(0.8, 1.0);
 
     // 진행률
-    final int total = itemCount <= 0 ? 1 : itemCount;
-    final int dp = (draftPage ?? 0).clamp(0, total);
-    final double progress = isDeveloped ? 1.0 : (dp / total);
+    final int total = widget.itemCount <= 0 ? 1 : widget.itemCount;
+    final int dp = (widget.draftPage ?? 0).clamp(0, total);
+    final double progress = widget.isDeveloped ? 1.0 : (dp / total);
 
     // ✅ 게이지 색 결정
-    final bool filledAndUndeveloped = !isDeveloped && (dp >= total);
+    final bool filledAndUndeveloped = !widget.isDeveloped && (dp >= total);
     final Color gaugeColor = filledAndUndeveloped
         ? const Color.fromARGB(255, 97, 255, 102)
         : isDarkMode
@@ -62,7 +71,7 @@ class FilmRollView extends StatelessWidget {
         : Colors.black;
 
     // 상태 뱃지
-    final Widget statusRow = isDeveloped
+    final Widget statusRow = widget.isDeveloped
         ? Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -70,21 +79,6 @@ class FilmRollView extends StatelessWidget {
                 radius: _kCardRadius,
                 child: TextChip(text: 'DEVELOPED'),
               ),
-              // const SizedBox(width: 8),
-              // _BadgeChip(
-              //   radius: _kCardRadius,
-              //   onTap: () {
-              //     // 공유 동작 (필요 시 교체)
-              //   },
-              //   child: Padding(
-              //     padding: EdgeInsets.symmetric(horizontal: 2.0),
-              //     child: Icon(
-              //       FontAwesomeIcons.shareNodes,
-              //       size: 12,
-              //       color: isDarkMode ? Colors.white : Colors.black,
-              //     ),
-              //   ),
-              // ),
             ],
           )
         : _ExpGaugeChip(
@@ -95,8 +89,8 @@ class FilmRollView extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        horizontalPageController.animateToPage(
-          rollIndex,
+        widget.horizontalPageController.animateToPage(
+          widget.rollIndex,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         );
@@ -115,7 +109,7 @@ class FilmRollView extends StatelessWidget {
               final pageHeight = cardHeight + verticalPadding;
               final cardTopOffset = (constraints.maxHeight - pageHeight) / 2;
 
-              final detailsRevealProgress = (verticalPage - (itemCount - 2))
+              final detailsRevealProgress = (widget.verticalPage - (widget.itemCount - 2))
                   .clamp(0.0, 1.0);
 
               return Stack(
@@ -131,7 +125,7 @@ class FilmRollView extends StatelessWidget {
                       opacity: diff.abs() < 0.5 ? 1.0 : 0.0,
                       child: Column(
                         children: [
-                          TextRollTitle(text: 'Film Roll ${rollIndex + 1}'),
+                          TextRollTitle(text: 'Film Roll ${widget.rollIndex + 1}'),
                           SizedBox(height: Sizes.size8),
                           TextRollDescription(text: 'This is a description.'),
                           const SizedBox(height: 16),
@@ -160,7 +154,7 @@ class FilmRollView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              'Started: ${filmRollDetails["started"]}',
+                              'Started: ${widget.filmRollDetails["started"]}',
                               style: TextStyle(
                                 fontSize: Sizes.size14,
                                 color: isDarkMode
@@ -170,7 +164,7 @@ class FilmRollView extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Ended: ${filmRollDetails["ended"]}',
+                              'Ended: ${widget.filmRollDetails["ended"]}',
                               style: TextStyle(
                                 fontSize: Sizes.size14,
                                 color: isDarkMode
@@ -183,7 +177,7 @@ class FilmRollView extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  'Developed: ${filmRollDetails["developed"]}',
+                                  'Developed: ${widget.filmRollDetails["developed"]}',
                                   style: TextStyle(
                                     fontSize: Sizes.size14,
                                     color: isDarkMode
@@ -202,9 +196,9 @@ class FilmRollView extends StatelessWidget {
                   // 세로 카드 리스트
                   PageView.builder(
                     scrollDirection: Axis.vertical,
-                    controller: verticalPageController,
+                    controller: widget.verticalPageController,
                     clipBehavior: Clip.none,
-                    itemCount: itemCount,
+                    itemCount: widget.itemCount,
                     itemBuilder: (context, itemIndex) {
                       BorderRadius? borderRadius;
                       if (itemIndex == 0) {
@@ -212,7 +206,7 @@ class FilmRollView extends StatelessWidget {
                           topLeft: Radius.circular(_kCardRadius),
                           topRight: Radius.circular(_kCardRadius),
                         );
-                      } else if (itemIndex == itemCount - 1) {
+                      } else if (itemIndex == widget.itemCount - 1) {
                         borderRadius = const BorderRadius.only(
                           bottomLeft: Radius.circular(_kCardRadius),
                           bottomRight: Radius.circular(_kCardRadius),
@@ -225,8 +219,8 @@ class FilmRollView extends StatelessWidget {
                               : Rolls.backgroundColorLight,
                           borderRadius: borderRadius,
                         ),
-                        padding: itemEdgeInsets(itemIndex, itemCount),
-                        child: Roll(rollIndex: rollIndex, itemIndex: itemIndex),
+                        padding: widget.itemEdgeInsets(itemIndex, widget.itemCount),
+                        child: Roll(rollIndex: widget.rollIndex, itemIndex: itemIndex),
                       );
                     },
                   ),

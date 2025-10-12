@@ -11,12 +11,10 @@ class NewRollCreateScreen extends StatefulWidget {
   const NewRollCreateScreen({
     super.key,
     required this.rollTitle,
-    required this.exp,
     required this.ctaLabel,
   });
 
   final String rollTitle;
-  final int exp;
   final String ctaLabel;
 
   @override
@@ -202,7 +200,7 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
                                   radius: 14,
                                   onTap: () => _showTooltip(
                                     _exposureInfoKey,
-                                    'Developing requires ${widget.exp} Moments.',
+                                    'Developing requires $_selectedExposure Moments.',
                                   ),
                                   child: Icon(
                                     Icons.info_outline,
