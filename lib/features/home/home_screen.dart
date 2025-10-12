@@ -381,6 +381,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     final activeRollIndex = _currentPage.round().clamp(0, filmRollCount - 1);
     final detail = _filmRollDetails[activeRollIndex];
 
+    final verticalPage = _verticalCurrentPages[activeRollIndex] ?? 0.0;
+    final bool showRollTitleInAppBar = verticalPage > 0.5;
+    final String rollTitle = 'Film Roll ${activeRollIndex + 1}';
+
     final horizontalScrollProgress = (_currentPage - _currentPage.round())
         .abs();
     final bottomNavOpacity = (1 - horizontalScrollProgress * 5).clamp(0.0, 1.0);
@@ -438,9 +442,19 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   ).push(_pushFromLeft(const NewRollScreen()));
                 },
               ),
-              title: Text(
-                'Exposure',
-                style: Theme.of(context).appBarTheme.titleTextStyle,
+              title: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: showRollTitleInAppBar
+                    ? Text(
+                        rollTitle,
+                        key: ValueKey(rollTitle),
+                        style: Theme.of(context).appBarTheme.titleTextStyle,
+                      )
+                    : Text(
+                        'Exposure',
+                        key: const ValueKey('Exposure'),
+                        style: Theme.of(context).appBarTheme.titleTextStyle,
+                      ),
               ),
               centerTitle: true,
               actions: [
