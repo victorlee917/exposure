@@ -357,6 +357,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ),
           ),
           body: Stack(
+            clipBehavior: Clip.none,
             children: [
               // 컨텐츠
               PageView.builder(

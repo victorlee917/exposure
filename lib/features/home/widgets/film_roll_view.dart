@@ -200,6 +200,7 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
 
                   // Vertical card list
                   ListView.builder(
+                    clipBehavior: Clip.none,
                     padding: EdgeInsets.only(
                       top: verticalPadding,
                       bottom: verticalPadding,
