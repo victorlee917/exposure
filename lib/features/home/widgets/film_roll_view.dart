@@ -17,12 +17,10 @@ class FilmRollView extends StatefulWidget {
     required this.rollIndex,
     required this.currentPage,
     required this.horizontalPageController,
-    required this.verticalPageController,
-    required this.verticalPage,
+    required this.scrollController,
     required this.isDeveloped,
     required this.filmRollDetails,
     required this.itemCount,
-    required this.itemEdgeInsets,
     this.shareIcon,
     this.draftPage, // 0-based, undeveloped 롤의 “다음에 쓸 인덱스”
   });
@@ -30,12 +28,10 @@ class FilmRollView extends StatefulWidget {
   final int rollIndex;
   final double currentPage;
   final PageController horizontalPageController;
-  final PageController verticalPageController;
-  final double verticalPage;
+  final ScrollController scrollController;
   final bool isDeveloped;
   final Map<String, String> filmRollDetails;
   final int itemCount;
-  final EdgeInsets Function(int, int) itemEdgeInsets;
   final Widget? shareIcon;
   final int? draftPage;
 
@@ -48,6 +44,16 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
 
   @override
   bool get wantKeepAlive => true;
+
+  EdgeInsets _itemEdgeInsets(index, length) {
+    if (index == 0) {
+      return const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0);
+    } else if (index == length - 1) {
+      return const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0);
+    } else {
+      return const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,89 +109,41 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
           child: LayoutBuilder(
             builder: (context, constraints) {
               const horizontalPadding = 16.0;
-              const verticalPadding = 16.0;
               final cardWidth = constraints.maxWidth - (horizontalPadding * 2);
               final cardHeight = cardWidth * 3 / 2;
-              final pageHeight = cardHeight + verticalPadding;
-              final cardTopOffset = (constraints.maxHeight - pageHeight) / 2;
 
-              final detailsRevealProgress = (widget.verticalPage - (widget.itemCount - 2))
-                  .clamp(0.0, 1.0);
+              final verticalPadding = (constraints.maxHeight - cardHeight) / 2;
+              final headerHeight = 100.0; // Approximate height of the header
+
+              final headerTop = verticalPadding - headerHeight - 20;
+
+              final footerHeight = 80.0;
+              final footerBottom = verticalPadding - footerHeight - 20;
 
               return Stack(
                 clipBehavior: Clip.none,
+                alignment: Alignment.center,
                 children: [
-                  // 상단 타이틀/설명/배지
+                  // Header
                   Positioned(
-                    top: cardTopOffset - 100,
-                    left: 0,
-                    right: 0,
+                    top: headerTop,
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 200),
                       opacity: diff.abs() < 0.5 ? 1.0 : 0.0,
-                      child: Column(
-                        children: [
-                          TextRollTitle(text: 'Film Roll ${widget.rollIndex + 1}'),
-                          SizedBox(height: Sizes.size8),
-                          TextRollDescription(text: 'This is a description.'),
-                          const SizedBox(height: 16),
-                          IntrinsicHeight(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [statusRow],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // 하단 메타정보
-                  Positioned(
-                    bottom: cardTopOffset - 80,
-                    left: horizontalPadding,
-                    right: horizontalPadding,
-                    child: Transform.translate(
-                      offset: Offset(0, 100 * (1 - detailsRevealProgress)),
-                      child: Opacity(
-                        opacity: detailsRevealProgress,
+                      child: Container(
+                        height: headerHeight,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              'Started: ${widget.filmRollDetails["started"]}',
-                              style: TextStyle(
-                                fontSize: Sizes.size14,
-                                color: isDarkMode
-                                    ? Fonts.colorSubTextDark
-                                    : Fonts.colorSubTextLight,
+                            TextRollTitle(text: 'Film Roll ${widget.rollIndex + 1}'),
+                            SizedBox(height: Sizes.size8),
+                            TextRollDescription(text: 'This is a description.'),
+                            const SizedBox(height: 16),
+                            IntrinsicHeight(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [statusRow],
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Ended: ${widget.filmRollDetails["ended"]}',
-                              style: TextStyle(
-                                fontSize: Sizes.size14,
-                                color: isDarkMode
-                                    ? Fonts.colorSubTextDark
-                                    : Fonts.colorSubTextLight,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Developed: ${widget.filmRollDetails["developed"]}',
-                                  style: TextStyle(
-                                    fontSize: Sizes.size14,
-                                    color: isDarkMode
-                                        ? Fonts.colorSubTextDark
-                                        : Fonts.colorSubTextLight,
-                                  ),
-                                ),
-                              ],
                             ),
                           ],
                         ),
@@ -193,11 +151,60 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
                     ),
                   ),
 
-                  // 세로 카드 리스트
-                  PageView.builder(
-                    scrollDirection: Axis.vertical,
-                    controller: widget.verticalPageController,
-                    clipBehavior: Clip.none,
+                  // Footer
+                  Positioned(
+                    bottom: footerBottom,
+                    child: Container(
+                      height: footerHeight,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Started: ${widget.filmRollDetails["started"]}',
+                            style: TextStyle(
+                              fontSize: Sizes.size14,
+                              color: isDarkMode
+                                  ? Fonts.colorSubTextDark
+                                  : Fonts.colorSubTextLight,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Ended: ${widget.filmRollDetails["ended"]}',
+                            style: TextStyle(
+                              fontSize: Sizes.size14,
+                              color: isDarkMode
+                                  ? Fonts.colorSubTextDark
+                                  : Fonts.colorSubTextLight,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Developed: ${widget.filmRollDetails["developed"]}',
+                                style: TextStyle(
+                                  fontSize: Sizes.size14,
+                                  color: isDarkMode
+                                      ? Fonts.colorSubTextDark
+                                      : Fonts.colorSubTextLight,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Vertical card list
+                  ListView.builder(
+                    padding: EdgeInsets.only(
+                      top: verticalPadding,
+                      bottom: verticalPadding,
+                    ),
+                    controller: widget.scrollController,
                     itemCount: widget.itemCount,
                     itemBuilder: (context, itemIndex) {
                       BorderRadius? borderRadius;
@@ -213,14 +220,17 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
                         );
                       }
                       return Container(
+                        height: cardHeight,
                         decoration: BoxDecoration(
                           color: isDarkMode
                               ? Rolls.backgroundColorDark
                               : Rolls.backgroundColorLight,
                           borderRadius: borderRadius,
                         ),
-                        padding: widget.itemEdgeInsets(itemIndex, widget.itemCount),
-                        child: Roll(rollIndex: widget.rollIndex, itemIndex: itemIndex),
+                        padding: _itemEdgeInsets(itemIndex, widget.itemCount),
+                        child: Roll(
+                            rollIndex: widget.rollIndex,
+                            itemIndex: itemIndex),
                       );
                     },
                   ),

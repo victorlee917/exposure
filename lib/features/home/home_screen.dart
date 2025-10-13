@@ -143,8 +143,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   late PageController _horizontalPageController;
   double _currentPage = 0.0;
 
-  final Map<int, PageController> _verticalPageControllers = {};
-  final Map<int, double> _verticalCurrentPages = {};
+  final Map<int, ScrollController> _scrollControllers = {};
+  final Map<int, double> _scrollOffsets = {};
 
   Timer? _navigatorIdleDebounce;
   bool _isNavigatorIdle = true;
@@ -189,13 +189,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     super.initState();
 
     for (int i = 0; i < _filmRollDetails.length; i++) {
-      final detail = _filmRollDetails[i];
-      final initialPage = detail.isDeveloped
-          ? 0
-          : detail.draftPage >= _itemCount
-              ? 0
-              : detail.draftPage;
-      _verticalCurrentPages[i] = initialPage.toDouble();
+      _scrollOffsets[i] = 0.0;
+      _scrollControllers[i] = ScrollController()
+        ..addListener(() {
+          setState(() {
+            _scrollOffsets[i] = _scrollControllers[i]!.offset;
+          });
+        });
     }
 
     _horizontalPageController = PageController(viewportFraction: 0.65)
@@ -226,10 +226,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     _btnFadeCtrl.dispose();
     _scrollAnimCtrl?.dispose();
     _horizontalPageController.dispose();
-    for (var controller in _verticalPageControllers.values) {
+    for (var controller in _scrollControllers.values) {
       controller.dispose();
     }
-    _verticalPageControllers.clear();
+    _scrollControllers.clear();
     super.dispose();
   }
 
@@ -246,94 +246,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       _btnFadeCtrl.reverse();
     }
     setState(() {});
-  }
-
-  void _onNavigatorActivity() {
-    if (_isNavigatorIdle) {
-      _isNavigatorIdle = false;
-      _updateButtonFade();
-    }
-    _navigatorIdleDebounce?.cancel();
-    _navigatorIdleDebounce = Timer(const Duration(milliseconds: 500), () {
-      if (!mounted) return;
-      _isNavigatorIdle = true;
-      _updateButtonFade();
-    });
-  }
-
-  PageController _ensureVerticalController(
-    BuildContext context,
-    int rollIndex,
-  ) {
-    return _verticalPageControllers.putIfAbsent(rollIndex, () {
-      const horizontalPadding = 16.0;
-      const verticalPadding = 16.0;
-      final screenWidth = MediaQuery.of(context).size.width;
-      final screenHeight = MediaQuery.of(context).size.height;
-      final cardWidth = (screenWidth * 0.65) - (horizontalPadding * 2);
-      final cardHeight = cardWidth * 3 / 2;
-      final pageHeight = cardHeight + verticalPadding;
-      final viewportFraction = (pageHeight / screenHeight).clamp(0.1, 1.0);
-
-      final controller = PageController(
-        viewportFraction: viewportFraction,
-        initialPage: _verticalCurrentPages[rollIndex]?.round() ?? 0,
-      );
-
-      controller.addListener(() {
-        if (!controller.hasClients) return;
-        final page = controller.page ?? _verticalCurrentPages[rollIndex] ?? 0.0;
-        setState(() => _verticalCurrentPages[rollIndex] = page);
-      });
-
-      return controller;
-    });
-  }
-
-  // 부드러운 픽셀 보간 스크롤
-  Future<void> _animateVerticalTo(int rollIndex, int targetPage) async {
-    final ctrl = _ensureVerticalController(context, rollIndex);
-    if (!ctrl.hasClients || !ctrl.position.haveDimensions) return;
-
-    _scrollAnimCtrl?.stop();
-    _scrollAnimCtrl?.dispose();
-    _scrollAnimCtrl = null;
-
-    final int steps = (_itemCount - 1).clamp(1, 1000000);
-    final double minPx = ctrl.position.minScrollExtent;
-    final double maxPx = ctrl.position.maxScrollExtent;
-    final double perPage = (maxPx - minPx) / steps;
-
-    final int clampedTarget = targetPage.clamp(0, _itemCount - 1);
-    final double startPx = ctrl.position.pixels;
-    final double endPx = minPx + perPage * clampedTarget;
-
-    final double pageDelta = ((endPx - startPx).abs() / perPage);
-    final int durMs = (220 + pageDelta * 70).clamp(220, 700).toInt();
-
-    final anim = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: durMs),
-    );
-    _scrollAnimCtrl = anim;
-    final curve = CurvedAnimation(parent: anim, curve: Curves.easeInOutCubic);
-    final tween = Tween<double>(begin: startPx, end: endPx).animate(curve);
-
-    void tick() {
-      if (!ctrl.hasClients) return;
-      ctrl.jumpTo(tween.value);
-    }
-
-    tween.addListener(tick);
-    try {
-      await anim.forward();
-    } finally {
-      tween.removeListener(tick);
-      anim.dispose();
-      if (identical(_scrollAnimCtrl, anim)) {
-        _scrollAnimCtrl = null;
-      }
-    }
   }
 
   void _openCaptureForRoll(int activeRollIndex) {
@@ -355,34 +267,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     Navigator.of(context).push(_presentFromBottomModal(page));
   }
 
-  Widget _buildItemNavigator(BuildContext context) {
-    final activeRollIndex = _currentPage.round().clamp(0, filmRollCount - 1);
-    final controller = _ensureVerticalController(context, activeRollIndex);
-
-    return ItemNavigator(
-      itemCount: _itemCount,
-      verticalPageController: controller,
-      currentVerticalPage: _verticalCurrentPages[activeRollIndex] ?? 0.0,
-      onDragPage: (double page) {
-        setState(() => _verticalCurrentPages[activeRollIndex] = page);
-        _onNavigatorActivity();
-      },
-      onSnapPage: (int page) {
-        setState(
-          () => _verticalCurrentPages[activeRollIndex] = page.toDouble(),
-        );
-        _onNavigatorActivity();
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final activeRollIndex = _currentPage.round().clamp(0, filmRollCount - 1);
     final detail = _filmRollDetails[activeRollIndex];
 
-    final verticalPage = _verticalCurrentPages[activeRollIndex] ?? 0.0;
-    final bool showRollTitleInAppBar = verticalPage > 0.5;
+    final scrollOffset = _scrollOffsets[activeRollIndex] ?? 0.0;
+    final bool showRollTitleInAppBar = scrollOffset > 100;
     final String rollTitle = 'Film Roll ${activeRollIndex + 1}';
 
     final horizontalScrollProgress = (_currentPage - _currentPage.round())
@@ -392,8 +283,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     // 하단 버튼
     Widget? bottomButton;
     if (!detail.isDeveloped) {
-      final int currentIndex = (_verticalCurrentPages[activeRollIndex] ?? 0.0)
-          .round();
+      final int currentIndex = (_scrollOffsets[activeRollIndex] ?? 0.0).round();
       final bool showDevelopLabel =
           (!detail.isDeveloped) && (detail.draftPage >= _itemCount);
 
@@ -403,12 +293,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       if (detail.draftPage >= _itemCount) {
         icon = FontAwesomeIcons.check;
         onPressed = () => {};
-      } else if (currentIndex > detail.draftPage) {
-        icon = FontAwesomeIcons.arrowUp;
-        onPressed = () => _animateVerticalTo(activeRollIndex, detail.draftPage);
-      } else if (currentIndex < detail.draftPage) {
-        icon = FontAwesomeIcons.arrowDown;
-        onPressed = () => _animateVerticalTo(activeRollIndex, detail.draftPage);
       } else {
         icon = FontAwesomeIcons.camera;
         onPressed = () => _openCaptureForRoll(activeRollIndex);
@@ -481,10 +365,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: filmRollCount,
                 clipBehavior: Clip.none,
                 itemBuilder: (context, rollIndex) {
-                  final verticalPageController = _ensureVerticalController(
-                    context,
-                    rollIndex,
-                  );
+                  final scrollController = _scrollControllers[rollIndex]!;
                   final d = _filmRollDetails[rollIndex];
 
                   return GestureDetector(
@@ -505,8 +386,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           rollIndex: rollIndex,
                           currentPage: _currentPage,
                           horizontalPageController: _horizontalPageController,
-                          verticalPageController: verticalPageController,
-                          verticalPage: _verticalCurrentPages[rollIndex] ?? 0.0,
+                          scrollController: scrollController,
                           isDeveloped: d.isDeveloped,
                           filmRollDetails: {
                             "started": d.started,
@@ -514,7 +394,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                             "developed": d.developedAt,
                           },
                           itemCount: _itemCount,
-                          itemEdgeInsets: _itemEdgeInsets,
                           shareIcon: null,
                           draftPage: d.draftPage,
                         ),
@@ -522,17 +401,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     ),
                   );
                 },
-              ),
-
-              // 페이지 네비게이터
-              Positioned(
-                bottom: 60,
-                left: isLeft ? 24 : null,
-                right: isLeft ? null : 24,
-                child: Opacity(
-                  opacity: bottomNavOpacity,
-                  child: _buildItemNavigator(context),
-                ),
               ),
 
               // 하단 버튼
@@ -579,15 +447,5 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         );
       },
     );
-  }
-
-  EdgeInsets _itemEdgeInsets(index, length) {
-    if (index == 0) {
-      return const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0);
-    } else if (index == length - 1) {
-      return const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0);
-    } else {
-      return const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0);
-    }
   }
 }
