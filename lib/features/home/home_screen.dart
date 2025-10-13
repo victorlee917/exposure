@@ -4,7 +4,6 @@ import 'package:daily_exposures/features/common/widgets/appbar_gradation.dart';
 import 'package:daily_exposures/features/create/new_roll_screen.dart';
 import 'package:daily_exposures/features/home/widgets/capture_button.dart';
 import 'package:daily_exposures/features/home/widgets/film_roll_view.dart';
-import 'package:daily_exposures/features/home/widgets/item_navigator.dart';
 import 'package:daily_exposures/features/my/my_screen.dart';
 import 'package:daily_exposures/features/capture/capture_picture_screen.dart';
 import 'package:daily_exposures/features/capture/capture_music_screen.dart';
@@ -172,7 +171,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       developedAt: "Not yet",
       type: "picture_vertical",
       isDeveloped: false,
-      draftPage: 6,
+      draftPage: 0,
     ),
     FilmRollDetail(
       started: "2023-03-01",

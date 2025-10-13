@@ -8,6 +8,8 @@ import 'package:daily_exposures/features/common/widgets/text_roll_description.da
 import 'package:daily_exposures/features/common/widgets/text_roll_title.dart';
 import 'package:flutter/material.dart';
 
+import 'package:daily_exposures/features/create/widgets/preview_film_roll.dart';
+
 import 'new_roll_create_screen.dart';
 
 class NewRollScreen extends StatefulWidget {
@@ -174,100 +176,12 @@ class _NewRollScreenState extends State<NewRollScreen> {
     return false;
   }
 
-  // 목업 카드 데이터
-  List<Map<String, dynamic>> _mockItems(int page) {
-    final palettes = <List<Color>>[
-      [
-        Colors.pinkAccent.shade100,
-        Colors.pink.shade300,
-        Colors.pink.shade100,
-        Colors.pink.shade400,
-        Colors.pink.shade50,
-      ],
-      [
-        Colors.lightBlueAccent.shade100,
-        Colors.blue.shade300,
-        Colors.blue.shade100,
-        Colors.blue.shade400,
-        Colors.blue.shade50,
-      ],
-      [
-        Colors.lightGreenAccent.shade100,
-        Colors.green.shade300,
-        Colors.green.shade100,
-        Colors.green.shade400,
-        Colors.green.shade50,
-      ],
-      [
-        Colors.amberAccent.shade100,
-        Colors.amber.shade300,
-        Colors.amber.shade100,
-        Colors.amber.shade400,
-        Colors.amber.shade50,
-      ],
-    ];
-    final titles = [
-      ['Color Film', 'B&W Classic', 'Vintage Mood', 'Cinematic', 'Daily Lite'],
-      ['Portra Style', 'Mono High', 'Retro Soft', 'Movie Grain', 'Quick Shot'],
-      ['Emerald', 'Forest', 'Mint', 'Olive', 'Lime'],
-      ['Sunrise', 'Noon', 'Sunset', 'Golden', 'Dawn'],
-    ];
-    final colors = palettes[page % palettes.length];
-    final names = titles[page % titles.length];
-    return List.generate(5, (i) {
-      return {
-        "title": names[i % names.length],
-        "color": colors[i % colors.length],
-      };
-    });
-  }
-
   Widget _buildVerticalList(BuildContext context, int pageIndex) {
-    final items = _mockItems(pageIndex);
-    final size = MediaQuery.of(context).size;
-    final cardH = size.height * (2 / 3);
-    final cardW = size.width * _viewportFraction;
-
     final ctrl = _verticalCtrls[pageIndex]!;
 
     return NotificationListener<ScrollNotification>(
       onNotification: (n) => _onScrollNotification(n, pageIndex),
-      child: ListView.builder(
-        controller: ctrl,
-        key: PageStorageKey('list-$pageIndex'),
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.only(top: 12, bottom: 12 + _paginationBottomMargin),
-        itemCount: _loopItems,
-        itemBuilder: (context, index) {
-          final data = items[index % items.length];
-          return Center(
-            child: Container(
-              height: cardH,
-              width: cardW,
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: data["color"] as Color,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x22000000),
-                    blurRadius: 12,
-                    offset: Offset(0, 8),
-                  ),
-                ],
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                data["title"] as String,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+      child: PreviewFilmRoll(scrollController: ctrl),
     );
   }
 

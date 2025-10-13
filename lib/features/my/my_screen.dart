@@ -141,19 +141,19 @@ class _MyScreenState extends State<MyScreen> {
                     );
                   },
                 ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: isLeftHandedMode,
-                  builder: (context, isLeftHanded, child) {
-                    return SwitchListTile.adaptive(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                      title: ListLabel(text: "Left-handed mode"),
-                      value: isLeftHanded,
-                      onChanged: (value) {
-                        isLeftHandedMode.value = value;
-                      },
-                    );
-                  },
-                ),
+                // ValueListenableBuilder<bool>(
+                //   valueListenable: isLeftHandedMode,
+                //   builder: (context, isLeftHanded, child) {
+                //     return SwitchListTile.adaptive(
+                //       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                //       title: ListLabel(text: "Left-handed mode"),
+                //       value: isLeftHanded,
+                //       onChanged: (value) {
+                //         isLeftHandedMode.value = value;
+                //       },
+                //     );
+                //   },
+                // ),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                   title: ListLabel(text: "Rate our App"),
