@@ -172,7 +172,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       developedAt: "Not yet",
       type: "picture_vertical",
       isDeveloped: false,
-      draftPage: 12,
+      draftPage: 6,
     ),
     FilmRollDetail(
       started: "2023-03-01",
@@ -217,7 +217,20 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       reverseCurve: Curves.easeInCubic,
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => _updateButtonFade());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateButtonFade();
+      for (int i = 0; i < _filmRollDetails.length; i++) {
+        final detail = _filmRollDetails[i];
+        if (!detail.isDeveloped && detail.draftPage < _itemCount) {
+          final screenWidth = MediaQuery.of(context).size.width;
+          const horizontalPadding = 16.0;
+          final cardWidth = (screenWidth * 0.65) - (horizontalPadding * 2);
+          final cardHeight = cardWidth * 3 / 2;
+          final initialOffset = detail.draftPage * cardHeight;
+          _scrollControllers[i]?.jumpTo(initialOffset);
+        }
+      }
+    });
   }
 
   @override
@@ -248,59 +261,127 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     setState(() {});
   }
 
+  void _animateToDraftPage(int rollIndex) {
+    final detail = _filmRollDetails[rollIndex];
+
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    const horizontalPadding = 16.0;
+
+    final cardWidth = (screenWidth * 0.65) - (horizontalPadding * 2);
+
+    final cardHeight = cardWidth * 3 / 2;
+
+    final targetOffset = detail.draftPage * cardHeight;
+
+    _scrollControllers[rollIndex]?.animateTo(
+      targetOffset,
+
+      duration: const Duration(milliseconds: 500),
+
+      curve: Curves.easeInOut,
+    );
+  }
+
   void _openCaptureForRoll(int activeRollIndex) {
     final type = _filmRollDetails[activeRollIndex].type;
+
     Widget page;
+
     switch (type) {
       case 'picture_vertical':
         page = const CapturePictureScreen();
+
         break;
+
       case 'music':
         page = const CaptureMusicScreen();
+
         break;
+
       case 'movie':
         page = const CaptureMovieScreen();
+
         break;
+
       default:
         page = const CapturePictureScreen();
     }
+
     Navigator.of(context).push(_presentFromBottomModal(page));
   }
 
   @override
   Widget build(BuildContext context) {
     final activeRollIndex = _currentPage.round().clamp(0, filmRollCount - 1);
+
     final detail = _filmRollDetails[activeRollIndex];
 
     final scrollOffset = _scrollOffsets[activeRollIndex] ?? 0.0;
+
     final bool showRollTitleInAppBar = scrollOffset > 100;
+
     final String rollTitle = 'Film Roll ${activeRollIndex + 1}';
 
     final horizontalScrollProgress = (_currentPage - _currentPage.round())
         .abs();
+
     final bottomNavOpacity = (1 - horizontalScrollProgress * 5).clamp(0.0, 1.0);
 
     // 하단 버튼
+
     Widget? bottomButton;
+
     if (!detail.isDeveloped) {
-      final int currentIndex = (_scrollOffsets[activeRollIndex] ?? 0.0).round();
+      final screenWidth = MediaQuery.of(context).size.width;
+
+      final screenHeight = MediaQuery.of(context).size.height;
+
+      const horizontalPadding = 16.0;
+
+      final cardWidth = (screenWidth * 0.65) - (horizontalPadding * 2);
+
+      final cardHeight = cardWidth * 3 / 2;
+
+      final viewportHeight = screenHeight - kToolbarHeight; // Approximate
+
+      final firstVisible = scrollOffset / cardHeight;
+
+      final lastVisible = (scrollOffset + viewportHeight) / cardHeight;
+
+      final isDraftVisible =
+          detail.draftPage >= firstVisible && detail.draftPage <= lastVisible;
+
       final bool showDevelopLabel =
           (!detail.isDeveloped) && (detail.draftPage >= _itemCount);
 
       IconData icon;
+
       VoidCallback onPressed;
 
       if (detail.draftPage >= _itemCount) {
         icon = FontAwesomeIcons.check;
+
         onPressed = () => {};
-      } else {
+      } else if (isDraftVisible) {
         icon = FontAwesomeIcons.camera;
+
         onPressed = () => _openCaptureForRoll(activeRollIndex);
+      } else if (firstVisible > detail.draftPage) {
+        icon = FontAwesomeIcons.arrowUp;
+
+        onPressed = () => _animateToDraftPage(activeRollIndex);
+      } else {
+        icon = FontAwesomeIcons.arrowDown;
+
+        onPressed = () => _animateToDraftPage(activeRollIndex);
       }
 
       bottomButton = CaptureButton(
         icon: icon,
+
         label: showDevelopLabel ? 'Develop' : 'Capture Moment',
+
         onPressed: onPressed,
       );
     }
