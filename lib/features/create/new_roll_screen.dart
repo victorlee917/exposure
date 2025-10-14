@@ -8,6 +8,7 @@ import 'package:daily_exposures/features/common/widgets/text_roll_description.da
 import 'package:daily_exposures/features/common/widgets/text_roll_title.dart';
 import 'package:flutter/material.dart';
 
+import 'package:daily_exposures/features/common/widgets/appbar_gradation.dart';
 import 'package:daily_exposures/features/create/widgets/preview_film_roll.dart';
 
 import 'new_roll_create_screen.dart';
@@ -22,7 +23,7 @@ class NewRollScreen extends StatefulWidget {
 
 class _NewRollScreenState extends State<NewRollScreen> {
   // 페이지/카드 세팅
-  static const double _viewportFraction = 0.60;
+  static const double _viewportFraction = 0.65;
   static const double _sideScale = 0.86;
   static const double _sideOpacityMin = 0.55;
   static const double _sideTranslateY = 14.0;
@@ -423,13 +424,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
           itemBuilder: (context, realIndex) {
             final dataIndex = realIndex % _pageCount;
             final page = _buildVerticalList(context, dataIndex);
-            return _decorateForIndex(
-              index: realIndex,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: page,
-              ),
-            );
+            return _decorateForIndex(index: realIndex, child: page);
           },
         );
       },
@@ -460,6 +455,12 @@ class _NewRollScreenState extends State<NewRollScreen> {
         children: [
           frozenLayer, // 동결 가능한 메인 컨텐츠
           Positioned.fill(child: _bottomCircularGradient(context)),
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: AppbarGradation(height: 40, useThemeBg: true),
+          ),
           Positioned(
             left: 0,
             right: 0,
