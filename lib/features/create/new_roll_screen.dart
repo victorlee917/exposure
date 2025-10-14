@@ -26,7 +26,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
   static const double _viewportFraction = 0.65;
   static const double _sideScale = 0.86;
   static const double _sideOpacityMin = 0.55;
-  static const double _sideTranslateY = 0.0;
+  static const double _sideTranslateY = 20.0;
 
   static const int _pageCount = 4;
   static const int _loopBase = 100;
