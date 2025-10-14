@@ -395,6 +395,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final statusBarHeight = MediaQuery.of(context).padding.top;
 
     // 라우트 애니메이션이 reverse이거나 _isPopping이면 동결
     final bool freeze =
@@ -446,17 +447,18 @@ class _NewRollScreenState extends State<NewRollScreen> {
     );
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       resizeToAvoidBottomInset: true,
       appBar: _buildHeroAppBar(), // Hero 유지
       body: Stack(
         children: [
           frozenLayer, // 동결 가능한 메인 컨텐츠
           Positioned.fill(child: _bottomCircularGradient(context)),
-          const Positioned(
-            top: 0,
+          Positioned(
+            top: kToolbarHeight + statusBarHeight,
             left: 0,
             right: 0,
-            child: AppbarGradation(height: 40, useThemeBg: true),
+            child: const AppbarGradation(height: 40, useThemeBg: true),
           ),
           Positioned(
             left: 0,
