@@ -16,7 +16,6 @@ class PreviewFilmRoll extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    const itemCount = 12;
 
     return Container(
       decoration: BoxDecoration(
@@ -25,7 +24,6 @@ class PreviewFilmRoll extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: ListView.builder(
         controller: scrollController,
-        itemCount: itemCount,
         itemBuilder: (context, index) {
           return Container(
             height: 200, // Placeholder height
@@ -35,7 +33,7 @@ class PreviewFilmRoll extends StatelessWidget {
                   : Rolls.backgroundColorLight,
             ),
             padding: EdgeInsets.fromLTRB(16.0, index == 0 ? 16.0 : 0, 16.0, 16.0),
-            child: Roll(rollIndex: 0, itemIndex: index),
+            child: Roll(rollIndex: 0, itemIndex: index % 12),
           );
         },
       ),

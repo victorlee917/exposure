@@ -26,14 +26,13 @@ class _NewRollScreenState extends State<NewRollScreen> {
   static const double _viewportFraction = 0.65;
   static const double _sideScale = 0.86;
   static const double _sideOpacityMin = 0.55;
-  static const double _sideTranslateY = 14.0;
+  static const double _sideTranslateY = 0.0;
 
   static const int _pageCount = 4;
-  static const int _loopBase = 10000;
+  static const int _loopBase = 100;
   static const double _paginationBottomMargin = 112.0;
 
   // 선택된 페이지의 리스트 자동 스크롤 (데모)
-  static const int _loopItems = 100000;
   static const double _autoSpeedPxPerTick = 0.7;
   static const Duration _tick = Duration(milliseconds: 16);
 
@@ -68,6 +67,10 @@ class _NewRollScreenState extends State<NewRollScreen> {
   final GlobalKey _markerKey = GlobalKey();
   double _radiusPx = 220.0;
 
+  // For vertical infinite scroll
+  static const double _itemHeight = 200.0;
+  static const int _initialVerticalItems = 100;
+
   @override
   void initState() {
     super.initState();
@@ -84,7 +87,9 @@ class _NewRollScreenState extends State<NewRollScreen> {
     );
 
     for (var i = 0; i < _pageCount; i++) {
-      _verticalCtrls[i] = ScrollController(initialScrollOffset: 0.0);
+      _verticalCtrls[i] = ScrollController(
+        initialScrollOffset: (_initialVerticalItems / 2) * _itemHeight,
+      );
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -153,15 +158,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
       if (_userDraggingVertical || _isPopping) return;
 
       final next = ctrl.offset + _autoSpeedPxPerTick;
-      final maxExtent = ctrl.position.hasPixels
-          ? ctrl.position.maxScrollExtent
-          : double.infinity;
-
-      if (next >= maxExtent - 2) {
-        ctrl.jumpTo(0.0);
-      } else {
-        ctrl.jumpTo(next);
-      }
+      ctrl.jumpTo(next);
     });
   }
 
@@ -236,7 +233,6 @@ class _NewRollScreenState extends State<NewRollScreen> {
               onPressed: _popWithFreeze, // ← 팝 시 즉시 동결
             ),
           ],
-          backgroundColor: Colors.transparent,
         ),
       ),
     );
@@ -432,6 +428,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
 
     // ✨ 잔상 방지 레이어: 팝 시 즉시 동결 + 그리기 경계 분리
     final Widget frozenLayer = ClipRect(
+      clipBehavior: Clip.none,
       child: RepaintBoundary(
         child: TickerMode(
           enabled: !freeze, // 애니메이션(오토스크롤/빌더) 정지
