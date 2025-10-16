@@ -23,6 +23,7 @@ class FilmRollView extends StatefulWidget {
     required this.itemCount,
     this.shareIcon,
     this.draftPage, // 0-based, undeveloped 롤의 “다음에 쓸 인덱스”
+    this.onCardTap,
   });
 
   final int rollIndex;
@@ -34,6 +35,7 @@ class FilmRollView extends StatefulWidget {
   final int itemCount;
   final Widget? shareIcon;
   final int? draftPage;
+  final void Function(int itemIndex, Object heroTag)? onCardTap;
 
   @override
   State<FilmRollView> createState() => _FilmRollViewState();
@@ -94,154 +96,159 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
           );
 
     return GestureDetector(
-      onTap: () {
-        widget.horizontalPageController.animateToPage(
-          widget.rollIndex,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-      },
+      onTap: diff.abs() > 0.5
+          ? () {
+              widget.horizontalPageController.animateToPage(
+                widget.rollIndex,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            }
+          : null,
       child: Opacity(
         opacity: opacity,
         child: Transform.scale(
-          scale: scale,
-          alignment: Alignment.center,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              const horizontalPadding = 16.0;
-              final cardWidth = constraints.maxWidth - (horizontalPadding * 2);
-              final cardHeight = cardWidth * 3 / 2;
+        scale: scale,
+        alignment: Alignment.center,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            const horizontalPadding = 16.0;
+            final cardWidth = constraints.maxWidth - (horizontalPadding * 2);
+            final cardHeight = cardWidth * 3 / 2;
 
-              final verticalPadding = (constraints.maxHeight - cardHeight) / 2;
-              final headerHeight = 100.0; // Approximate height of the header
+            final verticalPadding = (constraints.maxHeight - cardHeight) / 2;
+            final headerHeight = 100.0; // Approximate height of the header
 
-              final headerTop = verticalPadding - headerHeight - 20;
+            final headerTop = verticalPadding - headerHeight - 20;
 
-              final footerHeight = 80.0;
-              final footerBottom = verticalPadding - footerHeight - 20;
+            final footerHeight = 80.0;
+            final footerBottom = verticalPadding - footerHeight - 20;
 
-              return Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: [
-                  // Header
-                  Positioned(
-                    top: headerTop,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: diff.abs() < 0.5 ? 1.0 : 0.0,
-                      child: Container(
-                        height: headerHeight,
-                        child: Column(
-                          children: [
-                            TextRollTitle(text: 'Film Roll ${widget.rollIndex + 1}'),
-                            SizedBox(height: Sizes.size8),
-                            TextRollDescription(text: 'This is a description.'),
-                            const SizedBox(height: 16),
-                            IntrinsicHeight(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [statusRow],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Footer
-                  Positioned(
-                    bottom: footerBottom,
-                    child: Container(
-                      height: footerHeight,
+            return Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                // Header
+                Positioned(
+                  top: headerTop,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: diff.abs() < 0.5 ? 1.0 : 0.0,
+                    child: SizedBox(
+                      height: headerHeight,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            'Started: ${widget.filmRollDetails["started"]}',
-                            style: TextStyle(
-                              fontSize: Sizes.size14,
-                              color: isDarkMode
-                                  ? Fonts.colorSubTextDark
-                                  : Fonts.colorSubTextLight,
+                          TextRollTitle(text: 'Film Roll ${widget.rollIndex + 1}'),
+                          const SizedBox(height: Sizes.size8),
+                          TextRollDescription(text: 'This is a description.'),
+                          const SizedBox(height: 16),
+                          IntrinsicHeight(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [statusRow],
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Ended: ${widget.filmRollDetails["ended"]}',
-                            style: TextStyle(
-                              fontSize: Sizes.size14,
-                              color: isDarkMode
-                                  ? Fonts.colorSubTextDark
-                                  : Fonts.colorSubTextLight,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Developed: ${widget.filmRollDetails["developed"]}',
-                                style: TextStyle(
-                                  fontSize: Sizes.size14,
-                                  color: isDarkMode
-                                      ? Fonts.colorSubTextDark
-                                      : Fonts.colorSubTextLight,
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
                     ),
                   ),
+                ),
 
-                  // Vertical card list
-                  ListView.builder(
-                    clipBehavior: Clip.none,
-                    padding: EdgeInsets.only(
-                      top: verticalPadding,
-                      bottom: verticalPadding,
-                    ),
-                    controller: widget.scrollController,
-                    itemCount: widget.itemCount,
-                    itemBuilder: (context, itemIndex) {
-                      BorderRadius? borderRadius;
-                      if (itemIndex == 0) {
-                        borderRadius = const BorderRadius.only(
-                          topLeft: Radius.circular(_kCardRadius),
-                          topRight: Radius.circular(_kCardRadius),
-                        );
-                      } else if (itemIndex == widget.itemCount - 1) {
-                        borderRadius = const BorderRadius.only(
-                          bottomLeft: Radius.circular(_kCardRadius),
-                          bottomRight: Radius.circular(_kCardRadius),
-                        );
-                      }
-                      return Container(
-                        height: cardHeight,
-                        decoration: BoxDecoration(
-                          color: isDarkMode
-                              ? Rolls.backgroundColorDark
-                              : Rolls.backgroundColorLight,
-                          borderRadius: borderRadius,
+                // Footer
+                Positioned(
+                  bottom: footerBottom,
+                  child: SizedBox(
+                    height: footerHeight,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Started: ${widget.filmRollDetails["started"]}',
+                          style: TextStyle(
+                            fontSize: Sizes.size14,
+                            color: isDarkMode
+                                ? Fonts.colorSubTextDark
+                                : Fonts.colorSubTextLight,
+                          ),
                         ),
-                        padding: _itemEdgeInsets(itemIndex, widget.itemCount),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Ended: ${widget.filmRollDetails["ended"]}',
+                          style: TextStyle(
+                            fontSize: Sizes.size14,
+                            color: isDarkMode
+                                ? Fonts.colorSubTextDark
+                                : Fonts.colorSubTextLight,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Developed: ${widget.filmRollDetails["developed"]}',
+                              style: TextStyle(
+                                fontSize: Sizes.size14,
+                                color: isDarkMode
+                                    ? Fonts.colorSubTextDark
+                                    : Fonts.colorSubTextLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Vertical card list
+                ListView.builder(
+                  clipBehavior: Clip.none,
+                  padding: EdgeInsets.only(
+                    top: verticalPadding,
+                    bottom: verticalPadding,
+                  ),
+                  controller: widget.scrollController,
+                  itemCount: widget.itemCount,
+                  itemBuilder: (context, itemIndex) {
+                    BorderRadius? borderRadius;
+                    if (itemIndex == 0) {
+                      borderRadius = const BorderRadius.only(
+                        topLeft: Radius.circular(_kCardRadius),
+                        topRight: Radius.circular(_kCardRadius),
+                      );
+                    } else if (itemIndex == widget.itemCount - 1) {
+                      borderRadius = const BorderRadius.only(
+                        bottomLeft: Radius.circular(_kCardRadius),
+                        bottomRight: Radius.circular(_kCardRadius),
+                      );
+                    }
+                    final heroTag = 'roll-${widget.rollIndex}-item-$itemIndex';
+                    return Container(
+                      height: cardHeight,
+                      decoration: BoxDecoration(
+                        color: isDarkMode
+                            ? Rolls.backgroundColorDark
+                            : Rolls.backgroundColorLight,
+                        borderRadius: borderRadius,
+                      ),
+                      padding: _itemEdgeInsets(itemIndex, widget.itemCount),
+                      child: GestureDetector(
+                        onTap: () => widget.onCardTap?.call(itemIndex, heroTag),
                         child: Roll(
                             rollIndex: widget.rollIndex,
                             itemIndex: itemIndex),
-                      );
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
         ),
       ),
-    );
+    ));
   }
 }
 

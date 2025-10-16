@@ -8,6 +8,7 @@ import 'package:daily_exposures/features/my/my_screen.dart';
 import 'package:daily_exposures/features/capture/capture_picture_screen.dart';
 import 'package:daily_exposures/features/capture/capture_music_screen.dart';
 import 'package:daily_exposures/features/capture/capture_movie_screen.dart';
+import 'package:daily_exposures/features/detail/film_roll_detail_screen.dart';
 import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -275,9 +276,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
     _scrollControllers[rollIndex]?.animateTo(
       targetOffset,
-
       duration: const Duration(milliseconds: 500),
-
       curve: Curves.easeInOut,
     );
   }
@@ -310,6 +309,28 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     Navigator.of(context).push(_presentFromBottomModal(page));
   }
 
+  void _onCardTap(int rollIndex, int itemIndex, Object heroTag) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: true, // This is the key for the "same screen" feel
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return FilmRollDetailScreen(
+            rollTitle: 'Film Roll ${rollIndex + 1}',
+            rollIndex: rollIndex,
+            itemIndex: itemIndex,
+            itemCount: _itemCount,
+          );
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeRollIndex = _currentPage.round().clamp(0, filmRollCount - 1);
@@ -322,8 +343,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
     final String rollTitle = 'Film Roll ${activeRollIndex + 1}';
 
-    final horizontalScrollProgress = (_currentPage - _currentPage.round())
-        .abs();
+    final horizontalScrollProgress =
+        (_currentPage - _currentPage.round()).abs();
 
     final bottomNavOpacity = (1 - horizontalScrollProgress * 5).clamp(0.0, 1.0);
 
@@ -378,9 +399,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
       bottomButton = CaptureButton(
         icon: icon,
-
         label: showDevelopLabel ? 'Develop' : 'Capture Moment',
-
         onPressed: onPressed,
       );
     }
@@ -477,6 +496,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           itemCount: _itemCount,
                           shareIcon: null,
                           draftPage: d.draftPage,
+                          onCardTap: (itemIndex, heroTag) {
+                            _onCardTap(rollIndex, itemIndex, heroTag);
+                          },
                         ),
                       ),
                     ),
@@ -497,8 +519,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       filmRollCount - 1,
                     );
                     final d = _filmRollDetails[active];
-                    final ignoring =
-                        d.isDeveloped ||
+                    final ignoring = d.isDeveloped ||
                         _btnFadeCtrl.value <= 0.001 ||
                         !_isNavigatorIdle;
 
