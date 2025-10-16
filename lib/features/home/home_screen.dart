@@ -312,6 +312,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void _onCardTap(int rollIndex, int itemIndex, Object heroTag) {
     Navigator.of(context).push(
       PageRouteBuilder(
+        transitionDuration: const Duration(
+          milliseconds: 700,
+        ), // Longer duration
+        reverseTransitionDuration: const Duration(milliseconds: 400),
         opaque: true, // This is the key for the "same screen" feel
         pageBuilder: (context, animation, secondaryAnimation) {
           return FilmRollDetailScreen(
@@ -322,10 +326,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           );
         },
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
+          // Use a curved animation for a more dynamic feel
+          final curvedAnimation = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeInOutCubic, // A nice, smooth curve
+            reverseCurve: Curves.easeOutCubic,
           );
+
+          // Combine Fade and a very subtle Scale for elegance
+          return FadeTransition(opacity: curvedAnimation, child: child);
         },
       ),
     );
@@ -343,10 +352,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
     final String rollTitle = 'Film Roll ${activeRollIndex + 1}';
 
-    final horizontalScrollProgress =
-        (_currentPage - _currentPage.round()).abs();
-
-    final bottomNavOpacity = (1 - horizontalScrollProgress * 5).clamp(0.0, 1.0);
+    final horizontalScrollProgress = (_currentPage - _currentPage.round())
+        .abs();
 
     // 하단 버튼
 
@@ -519,7 +526,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       filmRollCount - 1,
                     );
                     final d = _filmRollDetails[active];
-                    final ignoring = d.isDeveloped ||
+                    final ignoring =
+                        d.isDeveloped ||
                         _btnFadeCtrl.value <= 0.001 ||
                         !_isNavigatorIdle;
 

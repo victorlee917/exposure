@@ -51,6 +51,7 @@ class _CaptionScreenState extends State<CaptionScreen> {
         child: Hero(
           tag: 'appbar-hero',
           child: AppBar(
+            surfaceTintColor: Colors.transparent,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () => Navigator.of(context).maybePop(),

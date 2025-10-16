@@ -233,6 +233,7 @@ class _CapturePictureScreenState extends State<CapturePictureScreen>
         // flight에서 AppBar 안의 텍스트 재레이아웃 방지를 위해 Material 감싸기
         child: Material(
           child: AppBar(
+            surfaceTintColor: Colors.transparent,
             leading: IconButton(
               icon: const Icon(Icons.close),
               onPressed: () => Navigator.of(context).maybePop(),

@@ -62,171 +62,166 @@ class _MyScreenState extends State<MyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        highlightColor: Colors.transparent,
-        splashColor: Colors.transparent,
-      ),
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight),
-          child: AppBar(
-            leading: IconButton(
-              icon: FaIcon(FontAwesomeIcons.chevronLeft),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            centerTitle: true,
-            elevation: 0,
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: AppBar(
+          surfaceTintColor: Colors.transparent,
+          leading: IconButton(
+            icon: FaIcon(FontAwesomeIcons.chevronLeft),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
           ),
+          centerTitle: true,
+          elevation: 0,
         ),
-        body: Stack(
-          children: [
-            // 본문
-            ListView(
-              padding: const EdgeInsets.only(
-                top: 0,
-                bottom: Paddings.buttonVertical,
-                left: Paddings.screentHorizontal,
-                right: Paddings.screentHorizontal,
-              ),
-              children: [
-                // const Text(
-                //   "Hello,\nnickname",
-                //   style: TextStyle(fontSize: 28, fontWeight: Fonts.weightHeavy),
-                // ),
-                // const SizedBox(height: 20),
-                // ListTile(
-                //   minTileHeight: Sizes.sizeButtonHeight,
-                //   contentPadding: const EdgeInsets.symmetric(
-                //     horizontal: Paddings.buttonHorizontal,
-                //   ),
-                //   shape: RoundedRectangleBorder(
-                //     borderRadius: BorderRadius.circular(Rvalues.button),
-                //     side: BorderSide(
-                //       color: isSystemDarkMode
-                //           ? Borders.lineColorDark
-                //           : Borders.lineColorLight,
-                //     ),
-                //   ),
-                //   title: const Text("exposure.link/nickname"),
-                //   trailing: const FaIcon(FontAwesomeIcons.share, size: 16),
-                //   onTap: () {
-                //     Share.share("exposure.link/nickname");
-                //   },
-                // ),
-                // const SizedBox(height: 20),
-                // ListTile(
-                //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                //   title: const ListLabel(text: "Change nickname"),
-                //   onTap: () {
-                //     Navigator.of(context).push(
-                //       MaterialPageRoute(
-                //         builder: (context) => const ChangeUsernameScreen(),
-                //       ),
-                //     );
-                //   },
-                // ),
-                ValueListenableBuilder(
-                  valueListenable: isDarkMode,
-                  builder: (context, value, child) {
-                    return SwitchListTile.adaptive(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                      title: const ListLabel(text: "Dark mode"),
-                      value: value,
-                      onChanged: (newValue) {
-                        isDarkMode.value = newValue;
-                      },
-                    );
-                  },
-                ),
-                // ValueListenableBuilder<bool>(
-                //   valueListenable: isLeftHandedMode,
-                //   builder: (context, isLeftHanded, child) {
-                //     return SwitchListTile.adaptive(
-                //       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                //       title: ListLabel(text: "Left-handed mode"),
-                //       value: isLeftHanded,
-                //       onChanged: (value) {
-                //         isLeftHandedMode.value = value;
-                //       },
-                //     );
-                //   },
-                // ),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: ListLabel(text: "Rate our App"),
-                  onTap: () async {
-                    final InAppReview inAppReview = InAppReview.instance;
-                    if (await inAppReview.isAvailable()) {
-                      inAppReview.requestReview();
-                    }
-                  },
-                ),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  title: ListLabel(text: "Exposure Instagram"),
-                  onTap: () {},
-                ),
-                // ListTile(
-                //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                //   title: ListLabel(text: "Privacy Policy"),
-                //   onTap: () {},
-                // ),
-                // ListTile(
-                //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                //   title: ListLabel(text: "Terms of Service"),
-                //   onTap: () {},
-                // ),
-                // Divider(
-                //   color: isSystemDarkMode
-                //       ? Borders.lineColorDark
-                //       : Borders.lineColorLight,
-                // ),
-                // ListTile(
-                //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                //   title: ListLabel(text: "Logout"),
-                //   onTap: () {},
-                // ),
-                // ListTile(
-                //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                //   title: ListLabel(
-                //     text: "Delete Account",
-                //     textColor: Colors.red,
-                //   ),
-                //   onTap: () {},
-                // ),
-              ],
-            ),
-
-            const Positioned(
+      ),
+      body: Stack(
+        children: [
+          // 본문
+          ListView(
+            padding: const EdgeInsets.only(
               top: 0,
-              left: 0,
-              right: 0,
-              child: AppbarGradation(
-                height: 40, // 높이 조정 가능
-                useThemeBg: true, // 테마 배경 → 투명
+              bottom: Paddings.buttonVertical,
+              left: Paddings.screentHorizontal,
+              right: Paddings.screentHorizontal,
+            ),
+            children: [
+              // const Text(
+              //   "Hello,\nnickname",
+              //   style: TextStyle(fontSize: 28, fontWeight: Fonts.weightHeavy),
+              // ),
+              // const SizedBox(height: 20),
+              // ListTile(
+              //   minTileHeight: Sizes.sizeButtonHeight,
+              //   contentPadding: const EdgeInsets.symmetric(
+              //     horizontal: Paddings.buttonHorizontal,
+              //   ),
+              //   shape: RoundedRectangleBorder(
+              //     borderRadius: BorderRadius.circular(Rvalues.button),
+              //     side: BorderSide(
+              //       color: isSystemDarkMode
+              //           ? Borders.lineColorDark
+              //           : Borders.lineColorLight,
+              //     ),
+              //   ),
+              //   title: const Text("exposure.link/nickname"),
+              //   trailing: const FaIcon(FontAwesomeIcons.share, size: 16),
+              //   onTap: () {
+              //     Share.share("exposure.link/nickname");
+              //   },
+              // ),
+              // const SizedBox(height: 20),
+              // ListTile(
+              //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              //   title: const ListLabel(text: "Change nickname"),
+              //   onTap: () {
+              //     Navigator.of(context).push(
+              //       MaterialPageRoute(
+              //         builder: (context) => const ChangeUsernameScreen(),
+              //       ),
+              //     );
+              //   },
+              // ),
+              ValueListenableBuilder(
+                valueListenable: isDarkMode,
+                builder: (context, value, child) {
+                  return SwitchListTile.adaptive(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    title: const ListLabel(text: "Dark mode"),
+                    value: value,
+                    onChanged: (newValue) {
+                      isDarkMode.value = newValue;
+                    },
+                  );
+                },
+              ),
+              // ValueListenableBuilder<bool>( // 주석 처리된 코드
+              //   valueListenable: isLeftHandedMode,
+              //   builder: (context, isLeftHanded, child) {
+              //     return SwitchListTile.adaptive(
+              //       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              //       title: ListLabel(text: "Left-handed mode"),
+              //       value: isLeftHanded,
+              //       onChanged: (value) {
+              //         isLeftHandedMode.value = value;
+              //       },
+              //     );
+              //   },
+              // ),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                title: ListLabel(text: "Rate our App"),
+                onTap: () async {
+                  final InAppReview inAppReview = InAppReview.instance;
+                  if (await inAppReview.isAvailable()) {
+                    inAppReview.requestReview();
+                  }
+                },
+              ),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                title: ListLabel(text: "Exposure Instagram"),
+                onTap: () {},
+              ),
+              // ListTile(
+              //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              //   title: ListLabel(text: "Privacy Policy"),
+              //   onTap: () {},
+              // ),
+              // ListTile(
+              //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              //   title: ListLabel(text: "Terms of Service"),
+              //   onTap: () {},
+              // ),
+              // Divider(
+              //   color: isSystemDarkMode
+              //       ? Borders.lineColorDark
+              //       : Borders.lineColorLight,
+              // ),
+              // ListTile(
+              //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              //   title: ListLabel(text: "Logout"),
+              //   onTap: () {},
+              // ),
+              // ListTile(
+              //   contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              //   title: ListLabel(
+              //     text: "Delete Account",
+              //     textColor: Colors.red,
+              //   ),
+              //   onTap: () {},
+              // ),
+            ],
+          ),
+
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: AppbarGradation(
+              height: 40, // 높이 조정 가능
+              useThemeBg: true, // 테마 배경 → 투명
+            ),
+          ),
+          // ✅ 왼쪽 엣지 스와이프 백 레이어 (상호작용 면적 24px)
+          //   - 본문 터치와 충돌 최소화 위해 "엣지 영역"만 Hit
+          //   - 한번 제스처를 잡으면 화면 어디로 드래그해도 이어짐
+          Align(
+            alignment: Alignment.centerLeft,
+            child: SizedBox(
+              width: _edgeWidth,
+              height: double.infinity,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onHorizontalDragStart: _onDragStart,
+                onHorizontalDragUpdate: _onDragUpdate,
+                onHorizontalDragEnd: _onDragEnd,
               ),
             ),
-            // ✅ 왼쪽 엣지 스와이프 백 레이어 (상호작용 면적 24px)
-            //   - 본문 터치와 충돌 최소화 위해 "엣지 영역"만 Hit
-            //   - 한번 제스처를 잡으면 화면 어디로 드래그해도 이어짐
-            Align(
-              alignment: Alignment.centerLeft,
-              child: SizedBox(
-                width: _edgeWidth,
-                height: double.infinity,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onHorizontalDragStart: _onDragStart,
-                  onHorizontalDragUpdate: _onDragUpdate,
-                  onHorizontalDragEnd: _onDragEnd,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

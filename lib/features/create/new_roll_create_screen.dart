@@ -72,6 +72,7 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
           automaticallyImplyLeading: false,
           title: Text(widget.rollTitle),
           centerTitle: true,
+          surfaceTintColor: Colors.transparent,
           actions: [
             IconButton(
               icon: const Icon(Icons.close),

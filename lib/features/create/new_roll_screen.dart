@@ -25,12 +25,12 @@ class _NewRollScreenState extends State<NewRollScreen> {
   // 페이지/카드 세팅
   static const double _viewportFraction = 0.65;
   static const double _sideScale = 0.86;
-  static const double _sideOpacityMin = 0.55;
+  static const double _sideOpacityMin = 0.20;
   static const double _sideTranslateY = 20.0;
 
   static const int _pageCount = 4;
   static const int _loopBase = 100;
-  static const double _paginationBottomMargin = 112.0;
+  static const double _paginationBottomMargin = 58.0;
 
   // 선택된 페이지의 리스트 자동 스크롤 (데모)
   static const double _autoSpeedPxPerTick = 0.7;
@@ -224,6 +224,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
         tag: 'hero-appbar',
         flightShuttleBuilder: _materialShuttle,
         child: AppBar(
+          surfaceTintColor: Colors.transparent,
           automaticallyImplyLeading: false,
           title: const Text('New Roll'),
           centerTitle: true,
@@ -362,30 +363,42 @@ class _NewRollScreenState extends State<NewRollScreen> {
   }
 
   // 하단 원형 그라데이션
+
   Widget _bottomCircularGradient(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     final List<Color> gradientColors = isDarkMode
         ? [
             Colors.black.withOpacity(0.95),
+
             Colors.black.withOpacity(0.55),
+
             Colors.black.withOpacity(0.18),
+
             Colors.transparent,
           ]
         : [
-            Colors.white.withOpacity(0.95),
+            Colors.white.withOpacity(0.1),
+
             Colors.white.withOpacity(0.55),
+
             Colors.white.withOpacity(0.20),
+
             Colors.white.withOpacity(0.0),
           ];
 
     return IgnorePointer(
       ignoring: true,
+
       child: CustomPaint(
         painter: _BottomCircleGradientPainter(
           radiusPx: _radiusPx,
+
           colors: gradientColors,
+
           stops: const [0.0, 0.45, 0.75, 1.0],
         ),
+
         size: Size.infinite,
       ),
     );

@@ -227,6 +227,9 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
                     final heroTag = 'roll-${widget.rollIndex}-item-$itemIndex';
                     return Hero(
                       tag: heroTag,
+                      createRectTween: (begin, end) {
+                        return MaterialRectArcTween(begin: begin, end: end);
+                      },
                       flightShuttleBuilder: (
                         BuildContext flightContext,
                         Animation<double> animation,
