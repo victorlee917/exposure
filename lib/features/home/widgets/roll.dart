@@ -11,7 +11,7 @@ class Roll extends StatelessWidget {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.black : Colors.white,
+        color: Colors.red,
         borderRadius: BorderRadius.circular(Rvalues.roll),
         // boxShadow: [
         //   BoxShadow(

@@ -225,20 +225,33 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
                       );
                     }
                     final heroTag = 'roll-${widget.rollIndex}-item-$itemIndex';
-                    return Container(
-                      height: cardHeight,
-                      decoration: BoxDecoration(
-                        color: isDarkMode
-                            ? Rolls.backgroundColorDark
-                            : Rolls.backgroundColorLight,
-                        borderRadius: borderRadius,
-                      ),
-                      padding: _itemEdgeInsets(itemIndex, widget.itemCount),
-                      child: GestureDetector(
-                        onTap: () => widget.onCardTap?.call(itemIndex, heroTag),
-                        child: Roll(
-                            rollIndex: widget.rollIndex,
-                            itemIndex: itemIndex),
+                    return Hero(
+                      tag: heroTag,
+                      flightShuttleBuilder: (
+                        BuildContext flightContext,
+                        Animation<double> animation,
+                        HeroFlightDirection flightDirection,
+                        BuildContext fromHeroContext,
+                        BuildContext toHeroContext,
+                      ) {
+                        final Hero toHero = toHeroContext.widget as Hero;
+                        return toHero.child;
+                      },
+                      child: Container(
+                        height: cardHeight,
+                        decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? Rolls.backgroundColorDark
+                              : Rolls.backgroundColorLight,
+                          borderRadius: borderRadius,
+                        ),
+                        padding: _itemEdgeInsets(itemIndex, widget.itemCount),
+                        child: GestureDetector(
+                          onTap: () => widget.onCardTap?.call(itemIndex, heroTag),
+                          child: Roll(
+                              rollIndex: widget.rollIndex,
+                              itemIndex: itemIndex),
+                        ),
                       ),
                     );
                   },
