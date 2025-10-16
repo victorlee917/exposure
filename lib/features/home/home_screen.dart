@@ -170,7 +170,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       started: "2023-02-01",
       ended: "In progress",
       developedAt: "Not yet",
-      type: "picture_vertical",
+      type: "music",
       isDeveloped: false,
       draftPage: 0,
     ),
@@ -312,11 +312,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void _onCardTap(int rollIndex, int itemIndex, Object heroTag) {
     Navigator.of(context).push(
       PageRouteBuilder(
-        transitionDuration: const Duration(
-          milliseconds: 700,
-        ), // Longer duration
-        reverseTransitionDuration: const Duration(milliseconds: 400),
-        opaque: true, // This is the key for the "same screen" feel
+        transitionDuration: const Duration(milliseconds: 300),
+        reverseTransitionDuration: Duration.zero,
+        opaque: true,
         pageBuilder: (context, animation, secondaryAnimation) {
           return FilmRollDetailScreen(
             rollTitle: 'Film Roll ${rollIndex + 1}',
@@ -324,17 +322,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             itemIndex: itemIndex,
             itemCount: _itemCount,
           );
-        },
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          // Use a curved animation for a more dynamic feel
-          final curvedAnimation = CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeInOutCubic, // A nice, smooth curve
-            reverseCurve: Curves.easeOutCubic,
-          );
-
-          // Combine Fade and a very subtle Scale for elegance
-          return FadeTransition(opacity: curvedAnimation, child: child);
         },
       ),
     );

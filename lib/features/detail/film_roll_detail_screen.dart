@@ -24,10 +24,14 @@ class FilmRollDetailScreen extends StatefulWidget {
 class _FilmRollDetailScreenState extends State<FilmRollDetailScreen> {
   late final PageController _pageController;
 
+  static const double _sidePageScale = 0.8; // 선택되지 않은 페이지의 스케일
+  static const double _sidePageOpacity = 0.2; // 선택되지 않은 페이지의 투명도
+  static const double _pageSpacing = 10.0; // 페이지 간 간격
+
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: widget.itemIndex);
+    _pageController = PageController(initialPage: widget.itemIndex, viewportFraction: 0.7);
   }
 
   @override
@@ -68,27 +72,48 @@ class _FilmRollDetailScreenState extends State<FilmRollDetailScreen> {
           PageView.builder(
             controller: _pageController,
             itemCount: widget.itemCount,
+            clipBehavior: Clip.none,
             itemBuilder: (context, index) {
               final heroTag = 'roll-${widget.rollIndex}-item-$index';
-              return Align(
-                alignment: Alignment.topCenter,
-                child: Hero(
-                  tag: heroTag,
-                  child: SizedBox(
-                    width: rollWidth,
-                    height: rollHeight,
-                    child: Roll(
-                      rollIndex: widget.rollIndex,
-                      itemIndex: index,
+              return AnimatedBuilder(
+                animation: _pageController,
+                builder: (context, child) {
+                  double currentPageValue = _pageController.hasClients && _pageController.position.hasContentDimensions
+                      ? _pageController.page!
+                      : widget.itemIndex.toDouble();
+                  double delta = index - currentPageValue;
+                  double scale = 1.0 - (delta.abs() * (1.0 - _sidePageScale));
+                  double opacity = 1.0 - (delta.abs() * (1.0 - _sidePageOpacity));
+
+                  final pageWidth = MediaQuery.of(context).size.width * _pageController.viewportFraction;
+                  final rollWidth = pageWidth - _pageSpacing;
+                  final rollHeight = rollWidth * 3 / 2;
+
+                  return Opacity(
+                    opacity: opacity.clamp(0.0, 1.0),
+                    child: Transform.scale(
+                      scale: scale.clamp(_sidePageScale, 1.0),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: _pageSpacing / 2),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: SizedBox(
+                            width: rollWidth,
+                            height: rollHeight,
+                            child: Roll(
+                              rollIndex: widget.rollIndex,
+                              itemIndex: index,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               );
             },
-          ),
-
-        ],
-      ),
-    );
-  }
-}
+                              ),
+                            ],
+                          ),
+                        );
+                      }}
