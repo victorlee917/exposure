@@ -8,6 +8,7 @@ class FilmRollDetailScreen extends StatefulWidget {
   final int rollIndex;
   final int itemIndex;
   final int itemCount;
+  final String type;
 
   const FilmRollDetailScreen({
     super.key,
@@ -15,6 +16,7 @@ class FilmRollDetailScreen extends StatefulWidget {
     required this.rollIndex,
     required this.itemIndex,
     required this.itemCount,
+    required this.type,
   });
 
   @override
@@ -87,7 +89,7 @@ class _FilmRollDetailScreenState extends State<FilmRollDetailScreen> {
 
                   final pageWidth = MediaQuery.of(context).size.width * _pageController.viewportFraction;
                   final rollWidth = pageWidth - _pageSpacing;
-                  final rollHeight = rollWidth * 3 / 2;
+                  final rollHeight = widget.type == 'music' ? rollWidth : rollWidth * 3 / 2;
 
                   return Opacity(
                     opacity: opacity.clamp(0.0, 1.0),

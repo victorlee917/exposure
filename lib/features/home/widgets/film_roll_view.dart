@@ -114,7 +114,7 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
           builder: (context, constraints) {
             const horizontalPadding = 16.0;
             final cardWidth = constraints.maxWidth - (horizontalPadding * 2);
-            final cardHeight = cardWidth * 3 / 2;
+            final cardHeight = widget.filmRollDetails['type'] == 'music' ? cardWidth : cardWidth * 3 / 2;
 
             final verticalPadding = (constraints.maxHeight - cardHeight) / 2;
             final headerHeight = 100.0; // Approximate height of the header
@@ -241,6 +241,7 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
                         return toHero.child;
                       },
                       child: Container(
+                        width: cardWidth,
                         height: cardHeight,
                         decoration: BoxDecoration(
                           color: isDarkMode
