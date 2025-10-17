@@ -25,6 +25,7 @@ class FilmRollDetailScreen extends StatefulWidget {
 
 class _FilmRollDetailScreenState extends State<FilmRollDetailScreen> {
   late final PageController _pageController;
+  late int _currentIndex;
 
   static const double _sidePageScale = 0.8; // 선택되지 않은 페이지의 스케일
   static const double _sidePageOpacity = 0.2; // 선택되지 않은 페이지의 투명도
@@ -33,7 +34,15 @@ class _FilmRollDetailScreenState extends State<FilmRollDetailScreen> {
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.itemIndex;
     _pageController = PageController(initialPage: widget.itemIndex, viewportFraction: 0.7);
+    _pageController.addListener(() {
+      if (_pageController.page!.round() != _currentIndex) {
+        setState(() {
+          _currentIndex = _pageController.page!.round();
+        });
+      }
+    });
   }
 
   @override
@@ -114,8 +123,23 @@ class _FilmRollDetailScreenState extends State<FilmRollDetailScreen> {
                 },
               );
             },
-                              ),
-                            ],
-                          ),
-                        );
-                      }}
+          ),
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: ItemNavigator(
+                currentIndex: _currentIndex,
+                itemCount: widget.itemCount,
+                onPageChanged: (index) {
+                  _pageController.jumpToPage(index);
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
