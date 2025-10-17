@@ -243,6 +243,7 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
                         return toHero.child;
                       },
                       child: Container(
+                        width: cardWidth,
                         height: cardHeight,
                         decoration: BoxDecoration(
                           color: isDarkMode

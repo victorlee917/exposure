@@ -488,6 +488,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                             "started": d.started,
                             "ended": d.ended,
                             "developed": d.developedAt,
+                            "type": d.type,
                           },
                           itemCount: _itemCount,
                           shareIcon: null,
