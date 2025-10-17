@@ -172,7 +172,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       developedAt: "Not yet",
       type: "music",
       isDeveloped: false,
-      draftPage: 0,
+      draftPage: 6,
     ),
     FilmRollDetail(
       started: "2023-03-01",
@@ -225,7 +225,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           final screenWidth = MediaQuery.of(context).size.width;
           const horizontalPadding = 16.0;
           final cardWidth = (screenWidth * 0.65) - (horizontalPadding * 2);
-          final cardHeight = cardWidth * 3 / 2;
+          final cardHeight = detail.type == 'music' ? cardWidth : cardWidth * 3 / 2;
           final initialOffset = detail.draftPage * cardHeight;
           _scrollControllers[i]?.jumpTo(initialOffset);
         }
@@ -270,7 +270,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
     final cardWidth = (screenWidth * 0.65) - (horizontalPadding * 2);
 
-    final cardHeight = cardWidth * 3 / 2;
+    final cardHeight = detail.type == 'music' ? cardWidth : cardWidth * 3 / 2;
 
     final targetOffset = detail.draftPage * cardHeight;
 
@@ -310,6 +310,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   void _onCardTap(int rollIndex, int itemIndex, Object heroTag) {
+    final detail = _filmRollDetails[rollIndex];
     Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 300),
@@ -321,6 +322,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             rollIndex: rollIndex,
             itemIndex: itemIndex,
             itemCount: _itemCount,
+            type: detail.type,
           );
         },
       ),
@@ -355,7 +357,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
       final cardWidth = (screenWidth * 0.65) - (horizontalPadding * 2);
 
-      final cardHeight = cardWidth * 3 / 2;
+      final cardHeight = detail.type == 'music' ? cardWidth : cardWidth * 3 / 2;
 
       final viewportHeight = screenHeight - kToolbarHeight; // Approximate
 
@@ -493,6 +495,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           onCardTap: (itemIndex, heroTag) {
                             _onCardTap(rollIndex, itemIndex, heroTag);
                           },
+                          type: d.type,
                         ),
                       ),
                     ),

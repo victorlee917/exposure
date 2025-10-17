@@ -24,6 +24,7 @@ class FilmRollView extends StatefulWidget {
     this.shareIcon,
     this.draftPage, // 0-based, undeveloped 롤의 “다음에 쓸 인덱스”
     this.onCardTap,
+    required this.type,
   });
 
   final int rollIndex;
@@ -36,6 +37,7 @@ class FilmRollView extends StatefulWidget {
   final Widget? shareIcon;
   final int? draftPage;
   final void Function(int itemIndex, Object heroTag)? onCardTap;
+  final String type;
 
   @override
   State<FilmRollView> createState() => _FilmRollViewState();
@@ -114,7 +116,7 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
           builder: (context, constraints) {
             const horizontalPadding = 16.0;
             final cardWidth = constraints.maxWidth - (horizontalPadding * 2);
-            final cardHeight = cardWidth * 3 / 2;
+            final cardHeight = widget.type == 'music' ? cardWidth : cardWidth * 3 / 2;
 
             final verticalPadding = (constraints.maxHeight - cardHeight) / 2;
             final headerHeight = 100.0; // Approximate height of the header
