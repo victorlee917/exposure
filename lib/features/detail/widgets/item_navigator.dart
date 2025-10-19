@@ -18,9 +18,10 @@ class ItemNavigator extends StatefulWidget {
 }
 
 class _ItemNavigatorState extends State<ItemNavigator> {
-  static const double _dragThreshold = 10.0;
+  static const double _dragThreshold = 15.0;
   double _dragDistance = 0.0;
   late int _tempIndex;
+  int _startDot = 0;
 
   static const double _dotSize = 8.0;
   static const double _dotMargin = 4.0;
@@ -30,40 +31,29 @@ class _ItemNavigatorState extends State<ItemNavigator> {
   void initState() {
     super.initState();
     _tempIndex = widget.currentIndex;
+    _updateStartDot();
   }
 
   @override
   void didUpdateWidget(covariant ItemNavigator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.currentIndex != _tempIndex) {
+    if (widget.currentIndex != oldWidget.currentIndex) {
       setState(() {
         _tempIndex = widget.currentIndex;
+        _updateStartDot();
       });
     }
   }
 
-  Widget _buildBaseDot(int index) {
-    final double distance = (index - _tempIndex).abs().toDouble();
-    final double maxDistance = (_visibleDots ~/ 2).toDouble();
-
-    double scale = 1.0;
-    if (maxDistance > 0) {
-      scale = 1.0 - (distance / maxDistance) * 0.3;
-      scale = scale.clamp(0.7, 1.0);
+  void _updateStartDot() {
+    if (widget.itemCount <= _visibleDots) {
+      _startDot = 0;
+      return;
     }
 
-    return Transform.scale(
-      scale: scale,
-      child: Container(
-        width: _dotSize,
-        height: _dotSize,
-        margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: _dotMargin),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Theme.of(context).colorScheme.secondary.withOpacity(0.4), // Base color for all dots
-        ),
-      ),
-    );
+    // Keep the active dot in the center of the visible dots.
+    const int centerPosition = _visibleDots ~/ 2;
+    _startDot = (_tempIndex - centerPosition).clamp(0, widget.itemCount - _visibleDots);
   }
 
   @override
@@ -75,33 +65,48 @@ class _ItemNavigatorState extends State<ItemNavigator> {
     final double dotFullWidth = _dotSize + (_dotMargin * 2);
     final double viewportWidth = _visibleDots * dotFullWidth;
 
-    // Calculate the range of dots to display in the 5-dot window
-    int startDot;
-    int endDot;
+    List<Widget> dots = [];
+    for (int i = 0; i < widget.itemCount; i++) {
+      final bool isVisible = i >= _startDot && i < _startDot + _visibleDots;
+      final bool isActive = i == _tempIndex;
 
-    if (widget.itemCount <= _visibleDots) {
-      startDot = 0;
-      endDot = widget.itemCount;
-    } else {
-      startDot = _tempIndex - (_visibleDots ~/ 2);
-      if (startDot < 0) {
-        startDot = 0;
+      final double distance = (i - _tempIndex).abs().toDouble();
+      final double maxDistance = (_visibleDots ~/ 2).toDouble();
+
+      double scale = 1.0;
+      if (maxDistance > 0) {
+        scale = 1.0 - (distance / maxDistance) * 0.3;
+        scale = scale.clamp(0.7, 1.0);
       }
-      endDot = startDot + _visibleDots;
-      if (endDot > widget.itemCount) {
-        endDot = widget.itemCount;
-        startDot = endDot - _visibleDots;
+      if (isActive) {
+        scale = 1.1;
       }
-    }
 
-    List<Widget> baseDots = [];
-    for (int i = startDot; i < endDot; i++) {
-      baseDots.add(_buildBaseDot(i));
+      dots.add(
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          width: isVisible ? dotFullWidth : 0,
+          child: Center(
+            child: AnimatedScale(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              scale: scale,
+              child: Container(
+                width: _dotSize,
+                height: _dotSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isActive
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.secondary.withOpacity(0.4),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
     }
-
-    // Calculate the left position for the AnimatedPositioned indicator
-    // This is the position of the _tempIndex dot relative to the start of the *currently displayed* baseDots.
-    final double indicatorLeft = (_tempIndex - startDot) * dotFullWidth + _dotMargin;
 
     return GestureDetector(
       onHorizontalDragStart: (details) {
@@ -115,6 +120,7 @@ class _ItemNavigatorState extends State<ItemNavigator> {
             if (_tempIndex > 0) {
               _tempIndex--;
               widget.onPageChanged(_tempIndex);
+              _updateStartDot();
             }
             _dragDistance -= _dragThreshold;
           }
@@ -122,6 +128,7 @@ class _ItemNavigatorState extends State<ItemNavigator> {
             if (_tempIndex < widget.itemCount - 1) {
               _tempIndex++;
               widget.onPageChanged(_tempIndex);
+              _updateStartDot();
             }
             _dragDistance += _dragThreshold;
           }
@@ -131,29 +138,9 @@ class _ItemNavigatorState extends State<ItemNavigator> {
         color: Colors.transparent,
         width: viewportWidth,
         height: 30,
-        child: Center(
-          child: Stack(
-            alignment: Alignment.centerLeft,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: baseDots,
-              ),
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                left: indicatorLeft,
-                child: Container(
-                  width: _dotSize,
-                  height: _dotSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: dots,
         ),
       ),
     );
