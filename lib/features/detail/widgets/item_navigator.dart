@@ -1,5 +1,8 @@
+import 'package:daily_exposures/constants/borders.dart';
+import 'package:daily_exposures/constants/rolls.dart';
+import 'package:daily_exposures/constants/rvalues.dart';
+import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 class ItemNavigator extends StatefulWidget {
   final int currentIndex;
@@ -22,6 +25,7 @@ class _ItemNavigatorState extends State<ItemNavigator> {
   double _dragDistance = 0.0;
   late int _tempIndex;
   int _startDot = 0;
+  bool _isDragging = false;
 
   static const double _dotSize = 8.0;
   static const double _dotMargin = 4.0;
@@ -53,16 +57,24 @@ class _ItemNavigatorState extends State<ItemNavigator> {
 
     // Keep the active dot in the center of the visible dots.
     const int centerPosition = _visibleDots ~/ 2;
-    _startDot = (_tempIndex - centerPosition).clamp(0, widget.itemCount - _visibleDots);
+    _startDot = (_tempIndex - centerPosition).clamp(
+      0,
+      widget.itemCount - _visibleDots,
+    );
   }
 
-  @override
   Widget build(BuildContext context) {
     if (widget.itemCount <= 1) {
       return const SizedBox.shrink();
     }
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode
+        ? Rolls.backgroundColorDark
+        : Rolls.backgroundColorLight;
+
     final double dotFullWidth = _dotSize + (_dotMargin * 2);
+
     final double viewportWidth = _visibleDots * dotFullWidth;
 
     List<Widget> dots = [];
@@ -98,8 +110,12 @@ class _ItemNavigatorState extends State<ItemNavigator> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isActive
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.secondary.withOpacity(0.4),
+                      ? isDarkMode
+                            ? Colors.white
+                            : Colors.black
+                      : isDarkMode
+                      ? Colors.white38
+                      : Colors.black38,
                 ),
               ),
             ),
@@ -111,6 +127,19 @@ class _ItemNavigatorState extends State<ItemNavigator> {
     return GestureDetector(
       onHorizontalDragStart: (details) {
         _dragDistance = 0.0;
+        setState(() {
+          _isDragging = true;
+        });
+      },
+      onHorizontalDragEnd: (details) {
+        setState(() {
+          _isDragging = false;
+        });
+      },
+      onHorizontalDragCancel: () {
+        setState(() {
+          _isDragging = false;
+        });
       },
       onHorizontalDragUpdate: (details) {
         setState(() {
@@ -134,14 +163,24 @@ class _ItemNavigatorState extends State<ItemNavigator> {
           }
         });
       },
-      child: Container(
-        color: Colors.transparent,
-        width: viewportWidth,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: viewportWidth + 20.0 + (_isDragging ? 2.0 : 0.0),
         height: 30,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: dots,
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          border: _isDragging
+              ? Border.all(
+                  color: isDarkMode
+                      ? Borders.lineColorDark
+                      : Borders.lineColorLight,
+                  width: 1.0,
+                )
+              : null,
+          borderRadius: BorderRadius.circular(Rvalues.roll),
         ),
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: dots),
       ),
     );
   }

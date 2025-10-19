@@ -125,16 +125,21 @@ class _FilmRollDetailScreenState extends State<FilmRollDetailScreen> {
             },
           ),
           Positioned(
-            bottom: 40,
+            bottom: 0,
             left: 0,
             right: 0,
-            child: Center(
-              child: ItemNavigator(
-                currentIndex: _currentIndex,
-                itemCount: widget.itemCount,
-                onPageChanged: (index) {
-                  _pageController.jumpToPage(index);
-                },
+            child: SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: ItemNavigator(
+                    currentIndex: _currentIndex,
+                    itemCount: widget.itemCount,
+                    onPageChanged: (index) {
+                      _pageController.jumpToPage(index);
+                    },
+                  ),
+                ),
               ),
             ),
           ),
