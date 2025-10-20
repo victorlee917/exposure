@@ -1,7 +1,6 @@
 import 'package:daily_exposures/constants/borders.dart';
 import 'package:daily_exposures/constants/rolls.dart';
 import 'package:daily_exposures/constants/rvalues.dart';
-import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 
 class ItemNavigator extends StatefulWidget {
