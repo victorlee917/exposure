@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 
 import 'package:daily_exposures/features/common/widgets/appbar_gradation.dart';
 import 'package:daily_exposures/features/create/widgets/preview_film_roll.dart';
+import 'package:daily_exposures/database/provider.dart';
+import 'package:daily_exposures/database/database.dart';
 
 import 'new_roll_create_screen.dart';
 
@@ -28,7 +30,6 @@ class _NewRollScreenState extends State<NewRollScreen> {
   static const double _sideOpacityMin = 0.20;
   static const double _sideTranslateY = 20.0;
 
-  static const int _pageCount = 4;
   static const int _loopBase = 100;
   static const double _paginationBottomMargin = 58.0;
 
@@ -46,22 +47,10 @@ class _NewRollScreenState extends State<NewRollScreen> {
   // 팝 시 잔상 방지용 플래그
   bool _isPopping = false;
 
-  // 페이지별 텍스트
-  final List<String> _pageTitles = const [
-    'Color Film Roll',
-    'Black & White Roll',
-    'Vintage Roll',
-    'Cinematic Roll',
-  ];
-
-  final List<String> _pageDescriptions = const [
-    'Capture your moments in vibrant colors.',
-    'For timeless, classic black & white shots.',
-    'Add nostalgic tones and old-school vibes.',
-    'Soft contrast and film-like motion feel.',
-  ];
-
-  final List<bool> _isPurchased = [true, false, true, false];
+  // Database에서 가져온 Roll 데이터
+  List<Roll> _rolls = [];
+  bool _isLoading = true;
+  int get _pageCount => _rolls.length;
 
   // 하단 그라데이션 반지름 측정용
   final GlobalKey _markerKey = GlobalKey();
@@ -74,6 +63,18 @@ class _NewRollScreenState extends State<NewRollScreen> {
   @override
   void initState() {
     super.initState();
+    _loadRolls();
+  }
+
+  Future<void> _loadRolls() async {
+    final rolls = await database.select(database.rolls).get();
+
+    if (!mounted) return;
+
+    setState(() {
+      _rolls = rolls;
+      _isLoading = false;
+    });
 
     final initialDataIndex = widget.initialSelectedIndex % _pageCount;
     _activeDataIndex = initialDataIndex;
@@ -176,10 +177,15 @@ class _NewRollScreenState extends State<NewRollScreen> {
 
   Widget _buildVerticalList(BuildContext context, int pageIndex) {
     final ctrl = _verticalCtrls[pageIndex]!;
+    final currentRoll = _rolls[pageIndex % _rolls.length];
+    final aspectRatio = currentRoll.imageRatio;
 
     return NotificationListener<ScrollNotification>(
       onNotification: (n) => _onScrollNotification(n, pageIndex),
-      child: PreviewFilmRoll(scrollController: ctrl),
+      child: PreviewFilmRoll(
+        scrollController: ctrl,
+        aspectRatio: aspectRatio,
+      ),
     );
   }
 
@@ -251,6 +257,10 @@ class _NewRollScreenState extends State<NewRollScreen> {
 
   // ====== 하단 오버레이 ======
   Widget _bottomOverlay(BuildContext context) {
+    if (_isLoading || _rolls.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
@@ -258,9 +268,10 @@ class _NewRollScreenState extends State<NewRollScreen> {
     final ctaButtonBgColor = isDarkMode ? Colors.white : Colors.black;
     final ctaButtonFgColor = isDarkMode ? Colors.black : Colors.white;
 
-    final title = _pageTitles[_activeDataIndex % _pageTitles.length];
-    final desc = _pageDescriptions[_activeDataIndex % _pageDescriptions.length];
-    final purchased = _isPurchased[_activeDataIndex];
+    final currentRoll = _rolls[_activeDataIndex % _rolls.length];
+    final title = currentRoll.title;
+    final desc = currentRoll.description ?? 'No description available';
+    final purchased = currentRoll.freeYn;
 
     final ctaLabel = purchased ? 'Create' : 'Purchase';
 
@@ -407,6 +418,26 @@ class _NewRollScreenState extends State<NewRollScreen> {
   // ====== UI ======
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: _buildHeroAppBar(),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_rolls.isEmpty) {
+      return Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: _buildHeroAppBar(),
+        body: const Center(
+          child: Text('No rolls available'),
+        ),
+      );
+    }
+
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final statusBarHeight = MediaQuery.of(context).padding.top;
 
