@@ -6,7 +6,7 @@ class PreviewFilmRoll extends StatelessWidget {
   const PreviewFilmRoll({
     super.key,
     required this.scrollController,
-    this.aspectRatio = 2 / 3,
+    this.aspectRatio = 3 / 2,
   });
 
   final ScrollController scrollController;
@@ -18,7 +18,9 @@ class PreviewFilmRoll extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? Rolls.backgroundColorDark : Rolls.backgroundColorLight,
+        color: isDarkMode
+            ? Rolls.backgroundColorDark
+            : Rolls.backgroundColorLight,
       ),
       clipBehavior: Clip.antiAlias,
       child: ListView.builder(
@@ -30,7 +32,12 @@ class PreviewFilmRoll extends StatelessWidget {
                   ? Rolls.backgroundColorDark
                   : Rolls.backgroundColorLight,
             ),
-            padding: EdgeInsets.fromLTRB(16.0, index == 0 ? 16.0 : 0, 16.0, 16.0),
+            padding: EdgeInsets.fromLTRB(
+              16.0,
+              index == 0 ? 16.0 : 0,
+              16.0,
+              16.0,
+            ),
             child: Roll(
               rollIndex: 0,
               itemIndex: index % 12,

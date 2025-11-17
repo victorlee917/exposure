@@ -9,6 +9,7 @@ import 'package:daily_exposures/features/capture/capture_picture_screen.dart';
 import 'package:daily_exposures/features/capture/capture_music_screen.dart';
 import 'package:daily_exposures/features/capture/capture_movie_screen.dart';
 import 'package:daily_exposures/features/detail/film_roll_detail_screen.dart';
+import 'package:daily_exposures/database/provider.dart';
 import 'package:daily_exposures/main.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -17,20 +18,28 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 // Model
 // ─────────────────────────────────────────────────────────────────────────────
 class FilmRollDetail {
-  final String started;
-  final String ended;
-  final String developedAt;
-  final String type; // picture_vertical / music / movie
-  bool isDeveloped;
-  int draftPage; // undeveloped 롤의 다음 컷(0-based)
+  final int id;
+  final String title;
+  final String? description;
+  final int totalExposure;
+  final String type; // vertical_picture / music / movie
+  final int currentExposure;
+  final bool developedYn;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final double imageRatio;
 
   FilmRollDetail({
-    required this.started,
-    required this.ended,
-    required this.developedAt,
+    required this.id,
+    required this.title,
+    this.description,
+    required this.totalExposure,
     required this.type,
-    required this.isDeveloped,
-    this.draftPage = 6,
+    required this.currentExposure,
+    required this.developedYn,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.imageRatio,
   });
 }
 
@@ -154,50 +163,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   AnimationController? _scrollAnimCtrl;
 
-  final int _itemCount = 12;
-  final int filmRollCount = 3;
-
-  final List<FilmRollDetail> _filmRollDetails = [
-    FilmRollDetail(
-      started: "2023-01-01",
-      ended: "2023-01-15",
-      developedAt: "2023-01-20",
-      type: "picture_vertical",
-      isDeveloped: true,
-      draftPage: 12,
-    ),
-    FilmRollDetail(
-      started: "2023-02-01",
-      ended: "In progress",
-      developedAt: "Not yet",
-      type: "music",
-      isDeveloped: false,
-      draftPage: 6,
-    ),
-    FilmRollDetail(
-      started: "2023-03-01",
-      ended: "2023-03-10",
-      developedAt: "2023-03-12",
-      type: "movie",
-      isDeveloped: true,
-      draftPage: 12,
-    ),
-  ];
+  List<FilmRollDetail> _filmRollDetails = [];
+  bool _isLoading = true;
+  int get filmRollCount => _filmRollDetails.length;
 
   @override
   void initState() {
     super.initState();
 
-    for (int i = 0; i < _filmRollDetails.length; i++) {
-      _scrollOffsets[i] = 0.0;
-      _scrollControllers[i] = ScrollController()
-        ..addListener(() {
-          setState(() {
-            _scrollOffsets[i] = _scrollControllers[i]!.offset;
-          });
-        });
-    }
-
+    // Initialize controllers first
     _horizontalPageController = PageController(viewportFraction: 0.65)
       ..addListener(() {
         if (_horizontalPageController.hasClients) {
@@ -217,17 +191,69 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       reverseCurve: Curves.easeInCubic,
     );
 
+    // Load data after controllers are initialized
+    _loadFilmRolls();
+  }
+
+  Future<void> _loadFilmRolls() async {
+    final userRolls = await database.select(database.userFilmRolls).get();
+
+    // Load Roll templates to get imageRatio for each type
+    final rolls = await database.select(database.rolls).get();
+    final rollMap = {for (var roll in rolls) roll.type: roll};
+
+    if (!mounted) return;
+
+    // Initialize scroll controllers for each roll
+    for (int i = 0; i < userRolls.length; i++) {
+      _scrollOffsets[i] = 0.0;
+      _scrollControllers[i] = ScrollController()
+        ..addListener(() {
+          if (mounted) {
+            setState(() {
+              _scrollOffsets[i] = _scrollControllers[i]!.offset;
+            });
+          }
+        });
+    }
+
+    setState(() {
+      _filmRollDetails = userRolls.map((roll) {
+        final rollTemplate = rollMap[roll.type];
+        final imageRatio = rollTemplate?.imageRatio ?? 1.5; // Default to 3/2 if not found
+
+        return FilmRollDetail(
+          id: roll.id,
+          title: roll.title,
+          description: roll.description,
+          totalExposure: roll.totalExposure,
+          type: roll.type,
+          currentExposure: roll.currentExposure,
+          developedYn: roll.developedYn,
+          createdAt: roll.createdAt,
+          updatedAt: roll.updatedAt,
+          imageRatio: imageRatio,
+        );
+      }).toList();
+      _isLoading = false;
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       _updateButtonFade();
+
       for (int i = 0; i < _filmRollDetails.length; i++) {
         final detail = _filmRollDetails[i];
-        if (!detail.isDeveloped && detail.draftPage < _itemCount) {
-          final screenWidth = MediaQuery.of(context).size.width;
-          const horizontalPadding = 16.0;
-          final cardWidth = (screenWidth * 0.65) - (horizontalPadding * 2);
-          final cardHeight = detail.type == 'music' ? cardWidth : cardWidth * 3 / 2;
-          final initialOffset = detail.draftPage * cardHeight;
-          _scrollControllers[i]?.jumpTo(initialOffset);
+        if (!detail.developedYn && detail.currentExposure < detail.totalExposure) {
+          if (_scrollControllers[i]?.hasClients ?? false) {
+            final screenWidth = MediaQuery.of(context).size.width;
+            const horizontalPadding = 16.0;
+            final cardWidth = (screenWidth * 0.65) - (horizontalPadding * 2);
+            final cardHeight = cardWidth * detail.imageRatio;
+            final initialOffset = detail.currentExposure * cardHeight;
+            _scrollControllers[i]?.jumpTo(initialOffset);
+          }
         }
       }
     });
@@ -248,10 +274,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   // 버튼 표시 조건 업데이트
   void _updateButtonFade() {
+    if (_filmRollDetails.isEmpty || filmRollCount == 0) return;
+
     final active = _currentPage.round().clamp(0, filmRollCount - 1);
-    if (_filmRollDetails.isEmpty) return;
     final detail = _filmRollDetails[active];
-    final shouldShow = (!detail.isDeveloped) && _isNavigatorIdle;
+    final shouldShow = (!detail.developedYn) && _isNavigatorIdle;
 
     if (shouldShow) {
       _btnFadeCtrl.forward();
@@ -262,6 +289,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   void _animateToDraftPage(int rollIndex) {
+    if (rollIndex >= _filmRollDetails.length) return;
+
     final detail = _filmRollDetails[rollIndex];
 
     final screenWidth = MediaQuery.of(context).size.width;
@@ -270,9 +299,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
     final cardWidth = (screenWidth * 0.65) - (horizontalPadding * 2);
 
-    final cardHeight = detail.type == 'music' ? cardWidth : cardWidth * 3 / 2;
+    final cardHeight = cardWidth * detail.imageRatio;
 
-    final targetOffset = detail.draftPage * cardHeight;
+    final targetOffset = detail.currentExposure * cardHeight;
 
     _scrollControllers[rollIndex]?.animateTo(
       targetOffset,
@@ -282,6 +311,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   void _openCaptureForRoll(int activeRollIndex) {
+    if (activeRollIndex >= _filmRollDetails.length) return;
+
     final type = _filmRollDetails[activeRollIndex].type;
 
     Widget page;
@@ -310,6 +341,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   void _onCardTap(int rollIndex, int itemIndex, Object heroTag) {
+    if (rollIndex >= _filmRollDetails.length) return;
+
     final detail = _filmRollDetails[rollIndex];
     Navigator.of(context).push(
       PageRouteBuilder(
@@ -318,10 +351,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         opaque: true,
         pageBuilder: (context, animation, secondaryAnimation) {
           return FilmRollDetailScreen(
-            rollTitle: 'Film Roll ${rollIndex + 1}',
+            rollTitle: detail.title,
             rollIndex: rollIndex,
             itemIndex: itemIndex,
-            itemCount: _itemCount,
+            itemCount: detail.totalExposure,
             type: detail.type,
           );
         },
@@ -331,24 +364,37 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final activeRollIndex = _currentPage.round().clamp(0, filmRollCount - 1);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    final detail = _filmRollDetails[activeRollIndex];
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Exposure'),
+          centerTitle: true,
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    // 빈 상태일 때는 기본값 사용
+    final activeRollIndex = filmRollCount > 0
+        ? _currentPage.round().clamp(0, filmRollCount - 1)
+        : 0;
+
+    final detail = filmRollCount > 0 ? _filmRollDetails[activeRollIndex] : null;
 
     final scrollOffset = _scrollOffsets[activeRollIndex] ?? 0.0;
 
-    final bool showRollTitleInAppBar = scrollOffset > 100;
+    final bool showRollTitleInAppBar = filmRollCount > 0 && scrollOffset > 100;
 
-    final String rollTitle = 'Film Roll ${activeRollIndex + 1}';
-
-    final horizontalScrollProgress = (_currentPage - _currentPage.round())
-        .abs();
+    final String rollTitle = detail?.title ?? 'Exposure';
 
     // 하단 버튼
-
     Widget? bottomButton;
 
-    if (!detail.isDeveloped) {
+    if (detail != null && !detail.developedYn) {
       final screenWidth = MediaQuery.of(context).size.width;
 
       final screenHeight = MediaQuery.of(context).size.height;
@@ -357,7 +403,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
       final cardWidth = (screenWidth * 0.65) - (horizontalPadding * 2);
 
-      final cardHeight = detail.type == 'music' ? cardWidth : cardWidth * 3 / 2;
+      final cardHeight = cardWidth * detail.imageRatio;
 
       final viewportHeight = screenHeight - kToolbarHeight; // Approximate
 
@@ -366,16 +412,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       final lastVisible = (scrollOffset + viewportHeight) / cardHeight;
 
       final isDraftVisible =
-          detail.draftPage >= firstVisible && detail.draftPage <= lastVisible;
+          detail.currentExposure >= firstVisible && detail.currentExposure <= lastVisible;
 
       final bool showDevelopLabel =
-          (!detail.isDeveloped) && (detail.draftPage >= _itemCount);
+          (!detail.developedYn) && (detail.currentExposure >= detail.totalExposure);
 
       IconData icon;
 
       VoidCallback onPressed;
 
-      if (detail.draftPage >= _itemCount) {
+      if (detail.currentExposure >= detail.totalExposure) {
         icon = FontAwesomeIcons.check;
 
         onPressed = () => {};
@@ -383,7 +429,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         icon = FontAwesomeIcons.camera;
 
         onPressed = () => _openCaptureForRoll(activeRollIndex);
-      } else if (firstVisible > detail.draftPage) {
+      } else if (firstVisible > detail.currentExposure) {
         icon = FontAwesomeIcons.arrowUp;
 
         onPressed = () => _animateToDraftPage(activeRollIndex);
@@ -455,16 +501,17 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             clipBehavior: Clip.none,
             children: [
               // 컨텐츠
-              PageView.builder(
-                scrollDirection: Axis.horizontal,
-                controller: _horizontalPageController,
-                itemCount: filmRollCount,
-                clipBehavior: Clip.none,
-                itemBuilder: (context, rollIndex) {
-                  final scrollController = _scrollControllers[rollIndex]!;
-                  final d = _filmRollDetails[rollIndex];
+              if (filmRollCount > 0)
+                PageView.builder(
+                  scrollDirection: Axis.horizontal,
+                  controller: _horizontalPageController,
+                  itemCount: filmRollCount,
+                  clipBehavior: Clip.none,
+                  itemBuilder: (context, rollIndex) {
+                    final scrollController = _scrollControllers[rollIndex]!;
+                    final d = _filmRollDetails[rollIndex];
 
-                  return GestureDetector(
+                    return GestureDetector(
                     onTap: () {
                       if (rollIndex != _currentPage.round()) {
                         _horizontalPageController.animateToPage(
@@ -483,20 +530,23 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           currentPage: _currentPage,
                           horizontalPageController: _horizontalPageController,
                           scrollController: scrollController,
-                          isDeveloped: d.isDeveloped,
+                          isDeveloped: d.developedYn,
                           filmRollDetails: {
-                            "started": d.started,
-                            "ended": d.ended,
-                            "developed": d.developedAt,
+                            "started": d.createdAt.toString().split(' ')[0],
+                            "ended": d.updatedAt.toString().split(' ')[0],
+                            "developed": d.developedYn ? d.updatedAt.toString().split(' ')[0] : "Not yet",
                             "type": d.type,
                           },
-                          itemCount: _itemCount,
+                          itemCount: d.totalExposure,
                           shareIcon: null,
-                          draftPage: d.draftPage,
+                          draftPage: d.currentExposure,
                           onCardTap: (itemIndex, heroTag) {
                             _onCardTap(rollIndex, itemIndex, heroTag);
                           },
                           type: d.type,
+                          title: d.title,
+                          description: d.description,
+                          imageRatio: d.imageRatio,
                         ),
                       ),
                     ),
@@ -504,32 +554,65 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
               ),
 
-              // 하단 버튼
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 24,
-                child: AnimatedBuilder(
-                  animation: _btnFadeCtrl,
-                  builder: (_, __) {
-                    final active = _currentPage.round().clamp(
-                      0,
-                      filmRollCount - 1,
-                    );
-                    final d = _filmRollDetails[active];
-                    final ignoring =
-                        d.isDeveloped ||
-                        _btnFadeCtrl.value <= 0.001 ||
-                        !_isNavigatorIdle;
-
-                    return IgnorePointer(
-                      ignoring: ignoring,
-                      child: FadeTransition(
-                        opacity: _btnFade,
-                        child: Center(child: bottomButton ?? const SizedBox()),
+              // 빈 상태 안내
+              if (filmRollCount == 0 && !_isLoading)
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.photo_album_outlined,
+                        size: 64,
+                        color: isDarkMode ? Colors.white38 : Colors.black38,
                       ),
-                    );
-                  },
+                      const SizedBox(height: 16),
+                      Text(
+                        'No Film Rolls Yet',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: isDarkMode ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Create your first roll to get started',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDarkMode ? Colors.white38 : Colors.black45,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // 하단 버튼
+              if (filmRollCount > 0)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 24,
+                  child: AnimatedBuilder(
+                    animation: _btnFadeCtrl,
+                    builder: (_, __) {
+                      final active = _currentPage.round().clamp(
+                        0,
+                        filmRollCount - 1,
+                      );
+                      final d = _filmRollDetails[active];
+                      final ignoring =
+                          d.developedYn ||
+                          _btnFadeCtrl.value <= 0.001 ||
+                          !_isNavigatorIdle;
+
+                      return IgnorePointer(
+                        ignoring: ignoring,
+                        child: FadeTransition(
+                          opacity: _btnFade,
+                          child: Center(child: bottomButton ?? const SizedBox()),
+                        ),
+                      );
+                    },
                 ),
               ),
 

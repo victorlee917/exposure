@@ -347,6 +347,7 @@ class _NewRollScreenState extends State<NewRollScreen> {
                         context,
                         NewRollCreateScreen(
                           rollTitle: title,
+                          rollType: currentRoll.type,
                           ctaLabel: 'Purchase',
                         ),
                       );
@@ -354,7 +355,11 @@ class _NewRollScreenState extends State<NewRollScreen> {
                     }
                     _pushSeamless(
                       context,
-                      NewRollCreateScreen(rollTitle: title, ctaLabel: 'Create'),
+                      NewRollCreateScreen(
+                        rollTitle: title,
+                        rollType: currentRoll.type,
+                        ctaLabel: 'Create',
+                      ),
                     );
                   },
                   child: Text(

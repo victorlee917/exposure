@@ -13,6 +13,7 @@ class PrimaryTextField extends StatefulWidget {
     this.focusNode,
     this.hintText,
     this.labelText,
+    this.errorText,
     this.keyboardType,
     this.textInputAction,
     this.inputFormatters,
@@ -29,6 +30,7 @@ class PrimaryTextField extends StatefulWidget {
   final FocusNode? focusNode;
   final String? hintText;
   final String? labelText;
+  final String? errorText;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final List<TextInputFormatter>? inputFormatters;
@@ -122,6 +124,11 @@ class _PrimaryTextFieldState extends State<PrimaryTextField> {
           fontSize: Sizes.size16,
           color: isDarkMode ? Colors.white : Colors.black,
         ),
+        errorText: widget.errorText,
+        errorStyle: TextStyle(
+          fontSize: Sizes.size12,
+          color: isDarkMode ? Colors.redAccent : Colors.red,
+        ),
         border: widget.border,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(Rvalues.button),
@@ -134,6 +141,20 @@ class _PrimaryTextFieldState extends State<PrimaryTextField> {
           borderSide: BorderSide(
             color: isDarkMode ? Colors.white : Colors.black,
             width: 1,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(Rvalues.button),
+          borderSide: BorderSide(
+            color: isDarkMode ? Colors.redAccent : Colors.red,
+            width: 1,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(Rvalues.button),
+          borderSide: BorderSide(
+            color: isDarkMode ? Colors.redAccent : Colors.red,
+            width: 2,
           ),
         ),
         contentPadding: const EdgeInsets.symmetric(

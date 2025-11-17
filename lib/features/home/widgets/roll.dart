@@ -6,7 +6,7 @@ class Roll extends StatelessWidget {
     super.key,
     required this.rollIndex,
     required this.itemIndex,
-    this.aspectRatio = 2 / 3,
+    this.aspectRatio = 3 / 2,
   });
 
   final int rollIndex, itemIndex;

@@ -5,16 +5,22 @@ import 'package:daily_exposures/constants/paddings.dart';
 import 'package:daily_exposures/constants/rvalues.dart';
 import 'package:daily_exposures/constants/sizes.dart';
 import 'package:daily_exposures/features/common/widgets/primary_text_field.dart';
+import 'package:daily_exposures/database/provider.dart';
+import 'package:daily_exposures/database/database.dart';
+import 'package:daily_exposures/features/home/home_screen.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 
 class NewRollCreateScreen extends StatefulWidget {
   const NewRollCreateScreen({
     super.key,
     required this.rollTitle,
+    required this.rollType,
     required this.ctaLabel,
   });
 
   final String rollTitle;
+  final String rollType;
   final String ctaLabel;
 
   @override
@@ -28,6 +34,17 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
   final _subtitleFocus = FocusNode();
 
   int _selectedExposure = 12;
+
+  // Validation error messages
+  String? _titleError;
+  String? _subtitleError;
+  String? _generalError;
+
+  // Error message constants (사용자가 관리 가능)
+  static const String errorTitleRequired = 'Title is required';
+  static const String errorTitleTooLong = 'Title must be 50 characters or less';
+  static const String errorSubtitleTooLong = 'Subtitle must be 100 characters or less';
+  static const String errorDatabaseSave = 'Failed to save. Please try again.';
 
   // EXP 툴팁용
   final GlobalKey _expBadgeKey = GlobalKey();
@@ -57,8 +74,73 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
     super.dispose();
   }
 
-  void _handleCreate() {
-    Navigator.of(context).maybePop();
+  Future<void> _handleCreate() async {
+    // Clear previous errors
+    setState(() {
+      _titleError = null;
+      _subtitleError = null;
+      _generalError = null;
+    });
+
+    // Validation
+    final title = _titleCtl.text.trim();
+    final subtitle = _subtitleCtl.text.trim();
+
+    bool hasError = false;
+
+    // Title validation
+    if (title.isEmpty) {
+      setState(() {
+        _titleError = errorTitleRequired;
+      });
+      hasError = true;
+    } else if (title.length > 50) {
+      setState(() {
+        _titleError = errorTitleTooLong;
+      });
+      hasError = true;
+    }
+
+    // Subtitle validation
+    if (subtitle.isNotEmpty && subtitle.length > 100) {
+      setState(() {
+        _subtitleError = errorSubtitleTooLong;
+      });
+      hasError = true;
+    }
+
+    if (hasError) {
+      return;
+    }
+
+    // 데이터 저장
+    try {
+      final now = DateTime.now();
+      await database.into(database.userFilmRolls).insert(
+        UserFilmRollsCompanion.insert(
+          title: title,
+          description: drift.Value(subtitle.isEmpty ? null : subtitle),
+          totalExposure: _selectedExposure,
+          type: widget.rollType,
+          currentExposure: const drift.Value(0),
+          developedYn: const drift.Value(false),
+          createdAt: drift.Value(now),
+          updatedAt: drift.Value(now),
+        ),
+      );
+
+      if (mounted) {
+        // 모든 이전 화면을 제거하고 Home으로 이동
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const Home()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _generalError = errorDatabaseSave;
+      });
+    }
   }
 
   // ── AppBar (Hero) ───────────────────────────────
@@ -262,6 +344,7 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
                           onSubmitted: (_) => _subtitleFocus.requestFocus(),
                           labelText: 'Title',
                           hintText: "Enter the Title",
+                          errorText: _titleError,
                           border: const OutlineInputBorder(),
                         ),
                         const SizedBox(height: 12),
@@ -273,6 +356,7 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
                           onSubmitted: (_) => _handleCreate(),
                           labelText: 'Subtitle',
                           hintText: "Enter the SubTitle",
+                          errorText: _subtitleError,
                           border: const OutlineInputBorder(),
                         ),
                         const SizedBox(height: 400),
@@ -281,6 +365,51 @@ class _NewRollCreateScreenState extends State<NewRollCreateScreen> {
                   ),
                 ),
               ),
+
+              // ===== 일반 에러 메시지 (버튼 상단) =====
+              if (_generalError != null)
+                AnimatedPositioned(
+                  duration: _kAnim,
+                  curve: Curves.easeOutCubic,
+                  left: Paddings.screentHorizontal,
+                  right: Paddings.screentHorizontal,
+                  bottom: buttonBottom + Sizes.sizeButtonHeight + 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isDarkMode
+                          ? Colors.redAccent.withOpacity(0.2)
+                          : Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(Rvalues.button),
+                      border: Border.all(
+                        color: isDarkMode ? Colors.redAccent : Colors.red,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          color: isDarkMode ? Colors.redAccent : Colors.red,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _generalError!,
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.redAccent : Colors.red,
+                              fontSize: Sizes.size14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
               // ===== CTA 버튼 =====
               AnimatedPositioned(

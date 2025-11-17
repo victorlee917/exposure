@@ -22,9 +22,12 @@ class FilmRollView extends StatefulWidget {
     required this.filmRollDetails,
     required this.itemCount,
     this.shareIcon,
-    this.draftPage, // 0-based, undeveloped 롤의 “다음에 쓸 인덱스”
+    this.draftPage, // 0-based, undeveloped 롤의 "다음에 쓸 인덱스"
     this.onCardTap,
     required this.type,
+    required this.title,
+    this.description,
+    required this.imageRatio,
   });
 
   final int rollIndex;
@@ -38,6 +41,9 @@ class FilmRollView extends StatefulWidget {
   final int? draftPage;
   final void Function(int itemIndex, Object heroTag)? onCardTap;
   final String type;
+  final String title;
+  final String? description;
+  final double imageRatio;
 
   @override
   State<FilmRollView> createState() => _FilmRollViewState();
@@ -116,7 +122,7 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
           builder: (context, constraints) {
             const horizontalPadding = 16.0;
             final cardWidth = constraints.maxWidth - (horizontalPadding * 2);
-            final cardHeight = widget.type == 'music' ? cardWidth : cardWidth * 3 / 2;
+            final cardHeight = cardWidth * widget.imageRatio;
 
             final verticalPadding = (constraints.maxHeight - cardHeight) / 2;
             final headerHeight = 100.0; // Approximate height of the header
@@ -140,9 +146,9 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
                       height: headerHeight,
                       child: Column(
                         children: [
-                          TextRollTitle(text: 'Film Roll ${widget.rollIndex + 1}'),
+                          TextRollTitle(text: widget.title),
                           const SizedBox(height: Sizes.size8),
-                          TextRollDescription(text: 'This is a description.'),
+                          TextRollDescription(text: widget.description ?? ''),
                           const SizedBox(height: 16),
                           IntrinsicHeight(
                             child: Row(

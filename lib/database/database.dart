@@ -9,12 +9,12 @@ import 'tables.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Rolls])
+@DriftDatabase(tables: [Rolls, UserFilmRolls])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -28,7 +28,7 @@ class AppDatabase extends _$AppDatabase {
             title: 'Picture Roll',
             type: 'vertical_picture',
             description: const Value('Capture Moments with Picture'),
-            imageRatio: const Value(2 / 3),
+            imageRatio: const Value(3 / 2),
             freeYn: const Value(true),
           ),
         );
@@ -37,7 +37,7 @@ class AppDatabase extends _$AppDatabase {
             title: 'Movie Roll',
             type: 'movie',
             description: const Value('Capture Moments with Movie'),
-            imageRatio: const Value(2 / 3),
+            imageRatio: const Value(3 / 2),
             freeYn: const Value(false),
           ),
         );
@@ -56,6 +56,9 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(rolls, rolls.description);
           await m.addColumn(rolls, rolls.imageRatio);
           await m.addColumn(rolls, rolls.freeYn);
+        }
+        if (from <= 2) {
+          await m.createTable(userFilmRolls);
         }
       },
     );
