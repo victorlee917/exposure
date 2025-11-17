@@ -261,8 +261,9 @@ class _FilmRollViewState extends State<FilmRollView> with AutomaticKeepAliveClie
                         child: GestureDetector(
                           onTap: () => widget.onCardTap?.call(itemIndex, heroTag),
                           child: Roll(
-                              rollIndex: widget.rollIndex,
-                              itemIndex: itemIndex),
+                            rollIndex: widget.rollIndex,
+                            itemIndex: itemIndex,
+                          ),
                         ),
                       ),
                     );

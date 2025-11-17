@@ -38,10 +38,12 @@ class PreviewFilmRoll extends StatelessWidget {
               16.0,
               16.0,
             ),
-            child: Roll(
-              rollIndex: 0,
-              itemIndex: index % 12,
-              aspectRatio: aspectRatio,
+            child: AspectRatio(
+              aspectRatio: 1 / aspectRatio,
+              child: Roll(
+                rollIndex: 0,
+                itemIndex: index % 12,
+              ),
             ),
           );
         },
